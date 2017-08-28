@@ -7,7 +7,6 @@
   </head>
   <body>
   <img id="play">
-  <div id="logger"></div>
     <h5>hello world2</h5>
 		
 	<script>
@@ -15,8 +14,6 @@
 		socket.on('stream',function(image){
 		 var img = document.getElementById("play");
 		 img.src = image;
-		 var log = document.getElementById("logger");
-		 log.text(image);
 	 });
 	</script>
 
