@@ -58,6 +58,22 @@ io.on('connection', function (socket) {
 	socket.on('stream',function(image) {
 		socket.broadcast.emit('stream',image)
 	});
+
+  socket.on('joinroom', function(room) {
+    console.log('joining room', room);
+    socket.join(room);
+  });
+
+  socket.on('sendvideo',function(data){
+      io.to(data.room).emit('sendtoyou', data.data)
+  });
+
+  socket.on('leaveRoom',function(room){
+    console.log('leave Room', room);
+    socket.leave(room)
+  });
+  
+
 })
 
 http.listen(port, function () {

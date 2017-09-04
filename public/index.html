@@ -7,23 +7,33 @@
 		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
   </head>
   <body>
-    <h5>hello world</h5>
+    <label>enter your room:</label>
+    <input type="number" id="roomNumber">
+    <button type="button" name="button" onclick="changeRoom()">change Room</button>
 		<video src="" id="video" style="width:680px;height:320px;" autoplay="true"></video>
 	<canvas id="preview"></canvas>
 	<div id="logger"></div>
 	<script>
+  // $(function() {
+  //
+  // })
+  function changeRoom () {
+    console.log('room: ' + $('#roomNumber').val())
+    socket.emit('joinroom', $('#roomNumber').val())
+  }
+
 	 var canvas = document.getElementById("preview");
 	 var context = canvas.getContext("2d");
-	 
+
 	 canvas.width = 800;
 	 canvas.height = 600;
 	 context.width = canvas.width;
 	 context.height = canvas.height;
 	 var video = document.getElementById("video");
 	 var socket = io();
-	 
+
 	 function logger(msg){
-		$("#logger").text(msg);		
+		$("#logger").text(msg);
 	 }
 	 function loadCam(stream){
 		video.src = window.URL.createObjectURL(stream);
@@ -33,9 +43,11 @@
 		logger("camera no connect");
 	 }
 	 function viewVideo(video,context){
-		context.drawImage(video,0,0,context.width,context.height);	
-		socket.emit('stream',canvas.toDataURL('image/webp'));
-		
+		context.drawImage(video,0,0,context.width,context.height);
+		// socket.emit('stream',canvas.toDataURL('image/jpeg'));
+    socket.emit('sendvideo',{data: canvas.toDataURL('image/jpeg'), room: $('#roomNumber').val()})
+
+
 	 }
 	 $(function(){
 		navigator.getUserMedia = (navigator.getUserMedia || navigator.
