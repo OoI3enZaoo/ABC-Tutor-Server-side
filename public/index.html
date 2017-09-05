@@ -3,64 +3,25 @@
   <head>
     <meta charset="utf-8">
     <title>hello</title>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-		<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+     <script src="https://cdn.omise.co/omise.js"></script>
   </head>
   <body>
-    <label>enter your room:</label>
-    <input type="number" id="roomNumber">
-    <button type="button" name="button" onclick="changeRoom()">change Room</button>
-		<video src="" id="video" style="width:680px;height:320px;" autoplay="true"></video>
-	<canvas id="preview"></canvas>
-	<div id="logger"></div>
-	<script>
-  // $(function() {
-  //
-  // })
-  function changeRoom () {
-    console.log('room: ' + $('#roomNumber').val())
-    socket.emit('joinroom', $('#roomNumber').val())
-  }
+    <h5>hello world</h5>
 
-	 var canvas = document.getElementById("preview");
-	 var context = canvas.getContext("2d");
-
-	 canvas.width = 800;
-	 canvas.height = 600;
-	 context.width = canvas.width;
-	 context.height = canvas.height;
-	 var video = document.getElementById("video");
-	 var socket = io();
-
-	 function logger(msg){
-		$("#logger").text(msg);
-	 }
-	 function loadCam(stream){
-		video.src = window.URL.createObjectURL(stream);
-		logger("camera has been connected");
-	 }
-	 function loadFail(){
-		logger("camera no connect");
-	 }
-	 function viewVideo(video,context){
-		context.drawImage(video,0,0,context.width,context.height);
-		// socket.emit('stream',canvas.toDataURL('image/jpeg'));
-    socket.emit('sendvideo',{data: canvas.toDataURL('image/jpeg'), room: $('#roomNumber').val()})
-
-
-	 }
-	 $(function(){
-		navigator.getUserMedia = (navigator.getUserMedia || navigator.
-		webkitGetUserMedia || navigator.mozGetUserMedia || navigator.
-		msgGetUserMedia);
-		if(navigator.getUserMedia) {
-		navigator.getUserMedia({video: true},loadCam,loadFail);
-		}
-		setInterval(function(){
-		viewVideo(video,context);
-		},50);
-	 });
-	</script>
+    <form name="checkoutForm" method="POST" action="/checkout">
+    <input type="hidden" name="description" value="Product order ฿100.25" />
+    <script type="text/javascript" src="https://cdn.omise.co/card.js"
+      data-key="pkey_test_591fmr4ytx1mn7u0beo"
+      data-image="https://image.freepik.com/free-icon/twitter-logo_318-40459.jpg"
+      data-frame-label="Merchant site name"
+      data-button-label="Pay now"
+      data-submit-label="Submit"
+      data-amount="10025"
+      data-currency="thb"
+      >
+    </script>
+    <!--the script will render <input type="hidden" name="omiseToken"> for you automatically-->
+</form>
 
   </body>
 </html>
