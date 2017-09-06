@@ -6,7 +6,7 @@ var cors = require('cors')
 
 var Log = require('log')
 var log = new Log('debug')
-var port = process.env.PORT || 5000
+var port = process.env.PORT || 1337
 var path = require('path');
 var bodyParser = require("body-parser");
 
@@ -30,56 +30,40 @@ io.on('connection', function (socket) {
       console.log('room: ' + room)
     })
     socket.on('private_message' ,function (data) {
-      io.to(data.room).emit('conversation_private', data)
+      io.to(data.room).emit('private_message', data)
+    })
+    socket.on('live_message' ,function (data) {
+      console.log('live_message')
+      io.to(data.room).emit('live_message', data)
+    })
+    socket.on('live_tutor', function (data) {
+      io.to(data.room).emit('live_tutor', data)
+    })
+    socket.on('stoplive' ,function (data) {
+      io.to(data.room).emit('stoplive', data)
+    })
+    socket.on('requestCamera' ,function (data) {
+      io.to(data.room).emit('requestCamera', data)
+    })
+    socket.on('refuseCamera' ,function (data) {
+      io.to(data.room).emit('refuseCamera', data)
+    })
+    socket.on('allowCamera', function(data) {
+      io.to(data.room).emit('allowCamera', data)
+    })
+    socket.on('live_cam_1', function(data) {      
+      io.to(data.room).emit('live_cam_1', data)
+    })
+    socket.on('live_cam_2', function(data) {      
+      io.to(data.room).emit('live_cam_2', data)
+    })
+    socket.on('live_cam_3', function(data) {      
+      io.to(data.room).emit('live_cam_3', data)
+    })
+    socket.on('live_cam_4', function(data) {      
+      io.to(data.room).emit('live_cam_4', data)
     })
 })
-
-// io.on('connection', function (socket) {
-//   socket.on('stream', function (image) {
-//     socket.broadcast.emit('stream', image)
-//   })
-// })
-// บ่งบอกสถานะคนที่เข้ามาใช้งาน โดยจะมีหมายเลข socket.id เเตกต่างกันครับ
-// io.on('connection', function (socket) {
-//   console.log('a user connected ', socket.id)
-//   // user ที่เปิดหรืออก browser
-//   socket.on('disconnect', function () {
-//     console.log('user disconnected ', socket.id)
-//   })
-//   socket.on('subscribe', function(room) {
-//     console.log('joining room', room);
-//     socket.join(room);
-//   });
-//   socket.on('leaveRoom',function(room){
-//     console.log('leave Room', room);
-//     socket.leave(room)
-//   });
-//   socket.on('private_message',function(data){
-//     console.log("send from room: " + data.room);
-//     io.to(data.room).emit('conversation_private', data);
-//     io.emit('admin', data)
-//   });
-//   socket.on('toUser',function(data){
-//       data.type = "admin"
-//       io.to(data.room).emit('fromAdmin', data)
-//   })
-//   socket.on('addNewCourse' ,function(data){
-//     console.log('addNewCourse: ' + data)
-//       io.emit('newCardData',data)
-//   })
-//   socket.on('removeCourse' ,function(data){
-//     console.log('removeCourse: ' + data)
-//       io.emit('removeCourse',data)
-//   })
-//
-//   // รับเฉพาะ Event ข้อความ จาก client
-//   socket.on('chat_message', function (msg) {
-//     console.log('socket by : ', socket.id, ' message: ' + msg)
-//     // ส่งข้อมูลกลับไปหาผู้ส่งมา
-//     io.emit('chat_message', msg)
-//   })
-// })
-
 http.listen(port, function () {
   log.info('Run Port // localhost:', port)
 })
