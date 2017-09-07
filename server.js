@@ -51,17 +51,25 @@ io.on('connection', function (socket) {
     socket.on('allowCamera', function(data) {
       io.to(data.room).emit('allowCamera', data)
     })
-    socket.on('live_cam_1', function(data) {      
+    socket.on('live_cam_1', function(data) {
       io.to(data.room).emit('live_cam_1', data)
     })
-    socket.on('live_cam_2', function(data) {      
+    socket.on('live_cam_2', function(data) {
       io.to(data.room).emit('live_cam_2', data)
     })
-    socket.on('live_cam_3', function(data) {      
+    socket.on('live_cam_3', function(data) {
       io.to(data.room).emit('live_cam_3', data)
     })
-    socket.on('live_cam_4', function(data) {      
+    socket.on('live_cam_4', function(data) {
       io.to(data.room).emit('live_cam_4', data)
+    })
+    socket.on('stopCamera' ,function (data) {
+      console.log('stopCamera')
+      io.to(data.room).emit('stopCamera', data)
+    })
+    socket.on('forceStopCamera',function (data) {
+      console.log('forceStopCamera')
+      io.to(data.room).emit('forceStopCamera', data)
     })
 })
 http.listen(port, function () {
