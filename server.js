@@ -6,7 +6,7 @@ var cors = require('cors')
 
 var Log = require('log')
 var log = new Log('debug')
-var port = process.env.PORT || 1337
+var port = process.env.PORT || 5000
 var path = require('path');
 var bodyParser = require("body-parser");
 
