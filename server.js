@@ -71,6 +71,21 @@ io.on('connection', function (socket) {
       console.log('forceStopCamera')
       io.to(data.room).emit('forceStopCamera', data)
     })
+    socket.on('announcement', function (data) {
+      io.to(data.room).emit('announcement', data)
+    })
+    socket.on('qa', function (data) {
+      io.to(data.room).emit('qa', data)
+    })
+    socket.on('courseContent', function (data) {
+      io.to(data.room).emit('courseContent', data)
+    })
+    socket.on('chat', function (data) {
+      io.to(data.room).emit('chat', data)
+    })
+    socket.on('course', function (data) {
+      io.to(data.room).emit('course', data)
+    })
 })
 http.listen(port, function () {
   log.info('Run Port // localhost:', port)
