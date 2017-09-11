@@ -16,7 +16,7 @@ app.use(bodyParser.urlencoded({
 }));
 // app.use(bodyParser.json());
 app.use(cors())
-// app.use(Express.static(path.join(__dirname, '/public')));
+
 
 app.get('/', function (req, res) {
   res.send(`<h1>555 Hello Vue.js 2 socket. io </h1> <br> <li> yarn add socket </li> <li> function socket.io  </li>`)
@@ -87,6 +87,8 @@ io.on('connection', function (socket) {
       io.to(data.room).emit('course', data)
     })
 })
+var api = require('./api/branch');
+app.use('/api', api);
 http.listen(port, function () {
   log.info('Run Port // localhost:', port)
 })
