@@ -1,8 +1,10 @@
 var Express = require('express')
 var app = new Express()
 var mongojs = require('mongojs');
-var db = mongojs('mongodb://ben:ben@ds133044.mlab.com:33044/tutordb', ['branch']);
 
+// var db = mongojs('mongodb://ben:ben@ds133044.mlab.com:33044/tutordb', ['branch']);
+
+var db = mongojs('mongodb://localhost:27017/Tutor', ['branchs']);
 
 console.log("test");
 db.on('connect', function() {
@@ -14,10 +16,11 @@ db.on('error', function(err) {
 
 
 app.get('/',function(req,res){
-  db.branch.find(function (err, docs) {
-  
+  db.branchs.find(function (err, docs) {
       res.json(docs)
+      console.log(docs)
   })
+
 
 })
 

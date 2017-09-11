@@ -6,7 +6,7 @@ var cors = require('cors')
 
 var Log = require('log')
 var log = new Log('debug')
-var port = process.env.PORT || 5000
+var port = process.env.PORT || 1337
 var path = require('path');
 var bodyParser = require("body-parser");
 
@@ -89,6 +89,8 @@ io.on('connection', function (socket) {
 })
 var api = require('./api/branch');
 app.use('/api', api);
+var api = require('./api/mlab');
+app.use('/mlab', api);
 http.listen(port, function () {
   log.info('Run Port // localhost:', port)
 })
