@@ -1,28 +1,13 @@
-var Express = require('express')
-var app = new Express()
+var express = require('express');
+var app = new express();
 var http = require('http').Server(app)
 var io = require('socket.io')(http)
 var cors = require('cors')
+app.use(cors({credentials: true, origin: 'http://localhost:4000'}));
 
-var Log = require('log')
-var log = new Log('debug')
-var port = process.env.PORT || 5000
-var path = require('path');
-var bodyParser = require("body-parser");
-
-// change
-app.use(bodyParser.urlencoded({
-    extended: false
-}));
-// app.use(bodyParser.json());
-app.use(cors())
-
-
-app.get('/', function (req, res) {
-  res.send(`<h1>555 Hello Vue.js 2 socket. io </h1> <br> <li> yarn add socket </li> <li> function socket.io  </li>`)
-//   res.redirect('index.html')
-})
-
+app.get('/',function(req,res) {
+	res.send('for socker.ioo');
+});
 io.on('connection', function (socket) {
     console.log('user connected: ' + socket.id);
     socket.on('subscribe', function (room) {
@@ -87,10 +72,7 @@ io.on('connection', function (socket) {
       io.to(data.room).emit('course', data)
     })
 })
-var api = require('./api/branch');
+var api = require('./api.js');
 app.use('/api', api);
-var api = require('./api/mlab');
-app.use('/mlab', api);
-http.listen(port, function () {
-  log.info('Run Port // localhost:', port)
-})
+var port = 4000;
+app.listen(port);
