@@ -17,6 +17,15 @@ app.get('/',function(req,res) {
 	});
 });
 
-
+app.get('/getcourse/:id',function(req,res) {
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+	  var id = req.params.id
+	  connection.query('SELECT * FROM `course` WHERE branch_id = ' + id, function(err, rows) {
+		res.send(rows);
+		connection.release();
+	  });
+	});
+});
 
 module.exports = app;

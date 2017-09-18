@@ -3,7 +3,7 @@ var app = new express();
 var http = require('http').Server(app)
 var io = require('socket.io')(http)
 var cors = require('cors')
-app.use(cors({credentials: true, origin: 'http://localhost:4000'}));
+app.use(cors({credentials: true, origin: 'http://localhost:4500'}));
 
 app.get('/',function(req,res) {
 	res.send('for socker.ioo');
