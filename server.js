@@ -1,9 +1,15 @@
 var express = require('express');
+http = require('http');
 var app = new express();
-var http = require('http').Server(app)
-var io = require('socket.io')(http)
+var server = http.createServer(app);
+var io = require('socket.io').listen(server);
 var cors = require('cors')
-app.use(cors({credentials: true, origin: 'http://localhost:4500'}));
+var bodyParser = require("body-parser");
+app.use(cors({credentials: true}));
+app.use(bodyParser.urlencoded({
+    extended: false
+}));
+app.use(bodyParser.json());
 
 app.get('/',function(req,res) {
 	res.send('for socker.ioo');
@@ -75,4 +81,6 @@ io.on('connection', function (socket) {
 var api = require('./api.js');
 app.use('/api', api);
 var port = 4000;
-app.listen(port);
+server.listen(port ,function(){ 
+console.log('server running on port: ' + port);
+});

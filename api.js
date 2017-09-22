@@ -11,7 +11,7 @@ app.get('/',function(req,res) {
 	mysqlPool.getConnection(function(err, connection) {
 	  if(err) throw err;
 	  connection.query('SELECT * FROM `branch`', function(err, rows) {
-		res.send(rows);
+		res.json(rows);
 		connection.release();
 	  });
 	});
@@ -22,10 +22,16 @@ app.get('/getcourse/:id',function(req,res) {
 	  if(err) throw err;
 	  var id = req.params.id
 	  connection.query('SELECT * FROM `course` WHERE branch_id = ' + id, function(err, rows) {
-		res.send(rows);
+		res.json(rows);
 		connection.release();
 	  });
 	});
 });
+//---- example ----- //
+app.post('/post/',function(req,res) {
+	var mname = req.body.email;
+	 console.log("id: " + mname);
+});
+//---- ------ ----- //
 
 module.exports = app;
