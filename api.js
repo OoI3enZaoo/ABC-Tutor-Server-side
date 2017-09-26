@@ -9,7 +9,7 @@ var storage = multer.diskStorage({
 	 if (!fs.existsSync(firstPath)){
 		fs.mkdir(firstPath);
 	}
-	 var path = firstPath + '/' + req.params.num;
+	 var path = firstPath + '/' + req.params.userid;
 	if (!fs.existsSync(path)){
 		fs.mkdir(path);
 	}
@@ -61,18 +61,19 @@ app.get('/courselength/:id',function(req,res) {
 	});
 });
 app.post('/upload/:userid/:contentid',  upload.any(), function(req, res) {
-	res.status(204).end();
-  var userid = req.params.userid;
-  var path = userid + '/' req.file
-  var contentid = req.params.contentid
+  var contentid = req.params.contentid //รับ content id
+  var userid = req.params.userid //รับไอดีผู้ใช้
+  var originalname = req.files[0].originalname //รับชื่อไฟล์
+  var path = userid + '/' + originalname //สร้าง path ไอดีผู้ใช้/ชื่อไฟล์
+  res.status(204).end();
   mysqlPool.getConnection(function(err, connection) {
     if(err) throw err;
-    var query = "INSERT INTO content_content_file VALUES("+contentid+","+path+")"
+    var query = "INSERT INTO content_content_file VALUES("+contentid+",'"+path+"')"
+    console.log(query)
     connection.query(query, function(err,rows){
       connection.release();
     })
   })
-
 });
 
 
