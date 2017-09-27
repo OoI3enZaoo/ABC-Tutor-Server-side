@@ -37,13 +37,13 @@ app.get('/',function(req,res) {
 	});
 });
 
-app.get('/getcourse/:id/:lfrom/:lto',function(req,res) {
+app.get('/getcourse/:id/',function(req,res) {
 	mysqlPool.getConnection(function(err, connection) {
 	  if(err) throw err;
 	  var id = req.params.id
 	  var lfrom = req.params.lfrom
 	  var lto = req.params.lto
-	  var query = "SELECT c.course_id, c.user_id, c.branch_id, c.subject, c.code, c.price, c.des, c.cover, c.ts FROM course c WHERE branch_id = "+id+" ORDER BY c.ts DESC limit "+lfrom+","+lto+""
+	  var query = "SELECT c.course_id, c.user_id, c.branch_id, c.subject, c.code, c.price, c.des, c.cover, c.ts, c.lastUpdate FROM course c WHERE branch_id = "+id+" ORDER BY c.ts DESC"
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
@@ -60,15 +60,26 @@ app.get('/courselength/:id',function(req,res) {
 	  });
 	});
 });
+app.get('/user/:id', function(req,res) {
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+	  var id = req.params.id
+	  connection.query('SELECT user_id,fname,lname,user_img,sex,birthday,email,facebook,twitter,youtube FROM `user` WHERE user_id = ' + id, function(err, rows) {
+		res.json(rows);
+		connection.release();
+	  });
+	});
+});
 app.post('/upload/:userid/:contentid',  upload.any(), function(req, res) {
   var contentid = req.params.contentid //รับ content id
   var userid = req.params.userid //รับไอดีผู้ใช้
   var originalname = req.files[0].originalname //รับชื่อไฟล์
   var path = userid + '/' + originalname //สร้าง path ไอดีผู้ใช้/ชื่อไฟล์
-  res.status(204).end();
+	var file_id = (new Date().getTime())
+    res.status(200).send();
   mysqlPool.getConnection(function(err, connection) {
     if(err) throw err;
-    var query = "INSERT INTO content_content_file VALUES("+contentid+",'"+path+"')"
+    var query = "INSERT INTO content_content_file VALUES("+file_id+",'"+contentid+"','"+path+"')"
     console.log(query)
     connection.query(query, function(err,rows){
       connection.release();
