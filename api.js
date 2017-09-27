@@ -70,6 +70,30 @@ app.get('/user/:id', function(req,res) {
 	  });
 	});
 });
+app.post('/insertcourse', function (req,res) {	
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;	  
+		var course_id = req.body.course_id
+		var user_id = req.body.user_id
+		var branch_id = req.body.branch_id
+		var subject = req.body.subject
+		var code = req.body.code
+		var price = req.body.price
+		var des = req.body.des
+		var cover = req.body.cover
+		var ts = req.body.ts
+		var coupon = req.body.coupon
+		var lastUpdate = req.body.lastUpdate
+		var query = "INSERT INTO course VALUES("+course_id+","+user_id+","+branch_id+",'"+subject+"','"+code+"',"+price+",TO_BASE64('"+des+"'),TO_BASE64('"+cover+"'),'"+ts+"','"+coupon+"','"+lastUpdate+"')"
+		console.log(query);
+		connection.query(query, function(err, rows) {
+			//res.json(rows)
+		res.status(200).send();
+
+		connection.release();
+	  });
+	});	
+});
 app.post('/upload/:userid/:contentid',  upload.any(), function(req, res) {
   var contentid = req.params.contentid //รับ content id
   var userid = req.params.userid //รับไอดีผู้ใช้

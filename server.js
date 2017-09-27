@@ -6,10 +6,11 @@ var io = require('socket.io').listen(server);
 var cors = require('cors')
 var bodyParser = require("body-parser");
 app.use(cors({credentials: true}));
-app.use(bodyParser.urlencoded({
-    extended: false
-}));
-app.use(bodyParser.json());
+
+//app.use(bodyParser.json());
+//app.use(bodyParser({limit: '100mb'}));
+//app.use(bodyParser.urlencoded({limit: '100mb'}));
+app.use(bodyParser.json({limit:1024102420, type:'application/json'}));
 
 app.get('/',function(req,res) {
 	res.send('for socker.ioo');
@@ -76,6 +77,10 @@ io.on('connection', function (socket) {
     })
     socket.on('course', function (data) {
       io.to(data.room).emit('course', data)
+    })
+	socket.on('PUSH_COURSE', function (data) {
+		console.log('PUSH_COURSE: ' + data.room);
+      io.to(data.room).emit('PUSH_COURSE', data)
     })
 })
 var api = require('./api.js');
