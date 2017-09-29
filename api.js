@@ -43,12 +43,14 @@ app.get('/getcourse/:id/',function(req,res) {
 	  var id = req.params.id
 	  var lfrom = req.params.lfrom
 	  var lto = req.params.lto
-	  var query = "SELECT c.course_id, c.user_id, c.branch_id, c.subject, c.code, c.price, c.des, c.cover, c.ts, c.lastUpdate FROM course c WHERE branch_id = "+id+" ORDER BY c.ts DESC"
+	  
+	  var query = "SELECT c.course_id, c.user_id, c.branch_id, c.subject, c.code, c.price, c.des as des, c.cover as cover, c.ts, c.lastUpdate FROM course c WHERE branch_id = "+id+" ORDER BY c.ts DESC"	
+	  console.log(query);
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
 	  });
-	});
+	})
 });
 app.get('/courselength/:id',function(req,res) {
 	mysqlPool.getConnection(function(err, connection) {
@@ -84,7 +86,7 @@ app.post('/insertcourse', function (req,res) {
 		var ts = req.body.ts
 		var coupon = req.body.coupon
 		var lastUpdate = req.body.lastUpdate
-		var query = "INSERT INTO course VALUES("+course_id+","+user_id+","+branch_id+",'"+subject+"','"+code+"',"+price+",TO_BASE64('"+des+"'),TO_BASE64('"+cover+"'),'"+ts+"','"+coupon+"','"+lastUpdate+"')"
+		var query = "INSERT INTO course VALUES("+course_id+","+user_id+","+branch_id+",'"+subject+"','"+code+"',"+price+",'"+des+"','"+cover+"','"+ts+"','"+coupon+"','"+lastUpdate+"')"
 		console.log(query);
 		connection.query(query, function(err, rows) {
 			//res.json(rows)
@@ -111,5 +113,17 @@ app.post('/upload/:userid/:contentid',  upload.any(), function(req, res) {
   })
 });
 
+app.get('/course/:id/',function(req,res) {
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+	  var id = req.params.id	  
+	  var query = "SELECT * FROM `course` WHERE course_id = "+id+""	
+	  console.log(query);
+	  connection.query(query, function(err, rows) {
+		res.json(rows);
+		connection.release();
+	  });
+	})
+});
 
 module.exports = app;
