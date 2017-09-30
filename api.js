@@ -41,10 +41,7 @@ app.get('/getcourse/:id/',function(req,res) {
 	mysqlPool.getConnection(function(err, connection) {
 	  if(err) throw err;
 	  var id = req.params.id
-	  var lfrom = req.params.lfrom
-	  var lto = req.params.lto
-	  
-	  var query = "SELECT c.course_id, c.user_id, c.branch_id, c.subject, c.code, c.price, c.des as des, c.cover as cover, c.ts, c.lastUpdate FROM course c WHERE branch_id = "+id+" ORDER BY c.ts DESC"	
+	  var query = "SELECT c.course_id, c.user_id, c.branch_id, c.subject, c.code, c.price, c.des as des, c.cover as cover, c.ts, c.lastUpdate, u.fname,u.lname,u.user_img,u.facebook,u.twitter,u.youtube from course c, user u WHERE u.user_id = c.user_id AND branch_id = "+id+" ORDER BY c.ts DESC"	
 	  console.log(query);
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
@@ -126,4 +123,20 @@ app.get('/course/:id/',function(req,res) {
 	})
 });
 
+app.post('/updateuser', function(req,res){
+	mysqlPool.getConnection(function(error,connection) {
+		var user_id = req.body.user_id
+		var fname = req.body.fname
+		var lname = req.body.lname
+		var user_img = req.body.user_img
+		var email = req.body.email
+		var facebook = req.body.facebook
+		var youtube = req.body.youtube
+		var twitter = req.body.twitter		
+		var query = "UPDATE user set fname = '"+fname+"',lname ='"+lname+"',user_img ='"+user_img+"',email='"+email+"',facebook='"+facebook+"',twitter='"+twitter+"', youtube='"+youtube+"' WHERE user_id = "+user_id+""
+		console.log(query)
+		/*connection.query(query,function (err){
+		})*/
+	});
+});
 module.exports = app;
