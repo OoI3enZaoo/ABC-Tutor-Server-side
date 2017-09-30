@@ -135,8 +135,7 @@ app.post('/updateuser', function(req,res){
 		var twitter = req.body.twitter		
 		var query = "UPDATE user set fname = '"+fname+"',lname ='"+lname+"',user_img ='"+user_img+"',email='"+email+"',facebook='"+facebook+"',twitter='"+twitter+"', youtube='"+youtube+"' WHERE user_id = "+user_id+""
 		console.log(query)
-		/*connection.query(query,function (err){
-		})*/
+		connection.query(query)
 	});
 });
 module.exports = app;
