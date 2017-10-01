@@ -80,7 +80,8 @@ io.on('connection', function (socket) {
     })
 	socket.on('PUSH_COURSE', function (data) {
 		console.log('PUSH_COURSE: ' + data.room);
-      io.to(data.room).emit('PUSH_COURSE', data)
+      //io.to(data.room).emit('PUSH_COURSE', data)
+	  io.emit('PUSH_COURSE', data)
     })
 })
 var api = require('./api.js');

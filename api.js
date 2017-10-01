@@ -13,7 +13,7 @@ var storage = multer.diskStorage({
 	if (!fs.existsSync(path)){
 		fs.mkdir(path);
 	}
-
+	console.log(path);
 	cb(null, path)
   },
   filename: function (req, file, cb) {

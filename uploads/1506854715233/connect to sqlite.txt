@@ -1,9 +1,0 @@
-C:\Users\Ben\AppData\Local\Android\sdk\platform-tools
-check package name in android studio : adb shell pm list packages
-
-Connect to sqlite: (com.example.ben.prefalls_app)
-adb devices
-adb -s emulator-xxxx shell
-/databases/
-sqlite3 <your-db-name>.db
-Select * from table1 where ...;
