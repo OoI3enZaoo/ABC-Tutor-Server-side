@@ -9,7 +9,7 @@ var storage = multer.diskStorage({
 	 if (!fs.existsSync(firstPath)){
 		fs.mkdir(firstPath);
 	}
-	 var path = firstPath + '/' + req.params.userid;
+	 var path = firstPath + '/' + req.params.contentid;
 	if (!fs.existsSync(path)){
 		fs.mkdir(path);
 	}
@@ -93,20 +93,20 @@ app.post('/insertcourse', function (req,res) {
 	  });
 	});	
 });
-app.post('/upload/:userid/:contentid',  upload.any(), function(req, res) {
-  var contentid = req.params.contentid //รับ content id
-  var userid = req.params.userid //รับไอดีผู้ใช้
-  var originalname = req.files[0].originalname //รับชื่อไฟล์
-  var path = userid + '/' + originalname //สร้าง path ไอดีผู้ใช้/ชื่อไฟล์
-	var file_id = (new Date().getTime())
-    res.status(200).send();
+app.post('/upload/:contentid',  upload.any(), function(req, res) {
+  		
+    res.status(200).send();	
+	var contentid = req.params.contentid //รับ content id  
   mysqlPool.getConnection(function(err, connection) {
     if(err) throw err;
-    var query = "INSERT INTO content_content_file VALUES("+file_id+",'"+contentid+"','"+path+"')"
-    console.log(query)
-    connection.query(query, function(err,rows){
-      connection.release();
-    })
+	for (i = 0; i < req.files.length; i++ ){				
+		var originalname = req.files[i].originalname //รับชื่อไฟล์
+		var path = contentid + '/' + originalname //สร้าง path ไอดีผู้ใช้/ชื่อไฟล์
+		var file_id = (new Date().getTime())	
+		var query = "INSERT INTO course_content_file VALUES("+contentid+",'"+path+"')"
+			console.log(query)
+			connection.query(query)	
+	}	   
   })
 });
 
@@ -135,7 +135,27 @@ app.post('/updateuser', function(req,res){
 		var twitter = req.body.twitter		
 		var query = "UPDATE user set fname = '"+fname+"',lname ='"+lname+"',user_img ='"+user_img+"',email='"+email+"',facebook='"+facebook+"',twitter='"+twitter+"', youtube='"+youtube+"' WHERE user_id = "+user_id+""
 		console.log(query)
+		connection.query(query, function(){
+			connection.release();
+		})
+	});
+});
+
+app.post('/insertcoursecontent', function(req,res){
+	mysqlPool.getConnection(function(error,connection) {
+		var content_id = req.body.content_id
+		var course_id = req.body.course_id
+		var content_title = req.body.content_title
+		var content_des =  req.body.content_des
+		var query = "INSERT INTO course_content VALUES("+content_id+","+course_id+",'"+content_title+"','"+content_des+"')"
+		console.log(query)	
 		connection.query(query)
 	});
 });
+app.get('/getfile/:contentid/:filename' , function(req,res){
+	var content_id = req.params.contentid
+	var filename = req.params.filename
+	var pathFile = __dirname + "/uploads/"+content_id+"/"+filename+""
+	res.sendFile(pathFile)
+})
 module.exports = app;
