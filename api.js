@@ -102,8 +102,8 @@ app.post('/upload/:contentid',  upload.any(), function(req, res) {
 	for (i = 0; i < req.files.length; i++ ){				
 		var originalname = req.files[i].originalname //รับชื่อไฟล์
 		var path = contentid + '/' + originalname //สร้าง path ไอดีผู้ใช้/ชื่อไฟล์
-		var file_id = (new Date().getTime())	
-		var query = "INSERT INTO course_content_file VALUES("+contentid+",'"+path+"')"
+		var query = "INSERT INTO `course_content_file`(`content_id`, `content_file`) VALUES ("+contentid+",'"+path+"')"		
+		//var query = "INSERT INTO course_content_file VALUES("+contentid+",'"+path+"')"
 			console.log(query)
 			connection.query(query)	
 	}	   
@@ -157,5 +157,18 @@ app.get('/getfile/:contentid/:filename' , function(req,res){
 	var filename = req.params.filename
 	var pathFile = __dirname + "/uploads/"+content_id+"/"+filename+""
 	res.sendFile(pathFile)
+})
+
+app.get('/popularcourse/:branch' , function(req,res){
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+	  var branch = req.params.branch	  
+	  var query = "SELECT * from (SELECT course_id, COUNT(course_id) as count FROM user_purchase WHERE branch_id = "+branch+" GROUP BY course_id ORDER BY count DESC limit 5) up, course c, user u WHERE up.course_id = c.course_id and c.user_id = u.user_id"	
+	  console.log(query);
+	  connection.query(query, function(err, rows) {
+		res.json(rows);
+		connection.release();
+	  });
+	})
 })
 module.exports = app;
