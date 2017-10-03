@@ -226,6 +226,21 @@ app.get('/user/:user_id',function(req,res) {
 	})
 });
 
+app.post('/insertreview' , function(req,res){
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+	  var course_id = req.body.course_id;
+	  var user_id = req.body.user_id
+	  var review_text = req.body.review_text;
+	  var review_ts = req.body.review_ts
+	  var review_vote = req.body.review_vote
+		var query = "INSERT INTO `course_review`(`course_id`, `user_id`, `review_text`, `review_ts`, `review_vote`) VALUES ("+course_id+","+user_id+",'"+review_text+"','"+review_ts+"',"+review_vote+")"
+	  console.log(query);
+	  connection.query(query);
+	})
+})
+
+
 
 
 
