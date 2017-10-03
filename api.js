@@ -173,6 +173,20 @@ app.get('/popularcourse/:branch' , function(req,res){
 	})
 })
 
+app.get('/popularcourse' , function(req,res){
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;	  
+	  var query = "SELECT * from course c , (SELECT course_id, count(course_id) as count from user_purchase GROUP BY course_id ORDER BY count desc limit 4) up,user u WHERE up.course_id = c.course_id and c.user_id = u.user_id"
+	  console.log(query);
+	  connection.query(query, function(err, rows) {
+		res.json(rows);
+		connection.release();
+	  });
+	})
+})
+
+
+
 app.post('/insertuserpurchase/' , function(req,res){
 	mysqlPool.getConnection(function(err, connection) {
 	  if(err) throw err;
@@ -190,7 +204,7 @@ app.get('/userpurchased/:course_id',function(req,res) {
 	mysqlPool.getConnection(function(err, connection) {
 	  if(err) throw err;
 	  var course_id = req.params.course_id	  
-	  var query = "SELECT u.user_img,up.course_id,u.fname,u.lname,up.purchase_ts FROM user u,user_purchase up  WHERE up.user_id = u.user_id AND course_id = "+course_id+" GROUP BY up.purchase_id ORDER BY up.purchase_ts desc"	  
+	  var query = "SELECT u.user_id, u.user_img,up.course_id,u.fname,u.lname,up.purchase_ts FROM user u,user_purchase up  WHERE up.user_id = u.user_id AND course_id = "+course_id+" GROUP BY up.purchase_id ORDER BY up.purchase_ts desc"	  
 	  console.log(query);
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
@@ -198,6 +212,20 @@ app.get('/userpurchased/:course_id',function(req,res) {
 	  });
 	})
 });
+
+app.get('/user/:user_id',function(req,res) {
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+	  var user_id = req.params.user_id	
+		var query = "SELECT * FROM `user` WHERE user_id = "+user_id+""
+	  console.log(query);
+	  connection.query(query, function(err, rows) {
+		res.json(rows);
+		connection.release();
+	  });
+	})
+});
+
 
 
 
