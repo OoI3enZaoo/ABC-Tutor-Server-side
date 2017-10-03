@@ -147,7 +147,8 @@ app.post('/insertcoursecontent', function(req,res){
 		var course_id = req.body.course_id
 		var content_title = req.body.content_title
 		var content_des =  req.body.content_des
-		var query = "INSERT INTO course_content VALUES("+content_id+","+course_id+",'"+content_title+"','"+content_des+"')"
+		var content_ts = req.body.content_ts
+		var query = "INSERT INTO course_content VALUES("+content_id+","+course_id+",'"+content_title+"','"+content_des+"','"+content_ts+"')"
 		console.log(query)	
 		connection.query(query)
 	});
@@ -171,4 +172,33 @@ app.get('/popularcourse/:branch' , function(req,res){
 	  });
 	})
 })
+
+app.post('/insertuserpurchase/' , function(req,res){
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+	  var course_id = req.body.course_id;
+	  var branch_id = req.body.branch_id;
+	  var user_id = req.body.user_id
+	  var purchase_ts = req.body.purchase_ts
+		var query = "INSERT INTO `user_purchase`(`course_id`, `branch_id`, `user_id`, `purchase_ts`) VALUES ("+course_id+","+branch_id+","+user_id+",'"+purchase_ts+"')"
+	  console.log(query);
+	  connection.query(query);
+	})
+})
+
+app.get('/userpurchased/:course_id',function(req,res) {
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+	  var course_id = req.params.course_id	  
+	  var query = "SELECT u.user_img,up.course_id,u.fname,u.lname,up.purchase_ts FROM user u,user_purchase up  WHERE up.user_id = u.user_id AND course_id = "+course_id+" GROUP BY up.purchase_id ORDER BY up.purchase_ts desc"	  
+	  console.log(query);
+	  connection.query(query, function(err, rows) {
+		res.json(rows);
+		connection.release();
+	  });
+	})
+});
+
+
+
 module.exports = app;
