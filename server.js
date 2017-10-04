@@ -78,11 +78,20 @@ io.on('connection', function (socket) {
     socket.on('course', function (data) {
       io.to(data.room).emit('course', data)
     })
-	socket.on('PUSH_COURSE', function (data) {
+	  socket.on('PUSH_COURSE', function (data) {
 		console.log('PUSH_COURSE: ' + data.room);
       //io.to(data.room).emit('PUSH_COURSE', data)
 	  io.emit('PUSH_COURSE', data)
     })
+	  socket.on('voting', function (data) {
+      io.emit('voting', data)
+    })
+    socket.on('course_review', function (data) {
+      io.emit('course_review', data)
+    }) 
+    socket.on('course_user_purchased', function (data) {
+      io.emit('course_user_purchased', data)
+    })     
 })
 var api = require('./api.js');
 app.use('/api', api);
