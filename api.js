@@ -42,7 +42,7 @@ app.get('/getcourse/:id/',function(req,res) {
 	  if(err) throw err;
 	  var id = req.params.id
 	  var query = "SELECT c.course_id, c.user_id, c.branch_id, c.subject, c.code, c.price, c.des as des, c.cover as cover, c.ts, c.lastUpdate, u.fname,u.lname,u.user_img,u.facebook,u.twitter,u.youtube from course c, user u WHERE u.user_id = c.user_id AND branch_id = "+id+" ORDER BY c.ts DESC"	
-	  console.log(query);
+	  ;
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
@@ -84,7 +84,7 @@ app.post('/insertcourse', function (req,res) {
 		var coupon = req.body.coupon
 		var lastUpdate = req.body.lastUpdate
 		var query = "INSERT INTO course VALUES("+course_id+","+user_id+","+branch_id+",'"+subject+"','"+code+"',"+price+",'"+des+"','"+cover+"','"+ts+"','"+coupon+"','"+lastUpdate+"')"
-		console.log(query);
+		;
 		connection.query(query, function(err, rows) {
 			//res.json(rows)
 		res.status(200).send();
@@ -104,7 +104,7 @@ app.post('/upload/:contentid',  upload.any(), function(req, res) {
 		var path = contentid + '/' + originalname //สร้าง path ไอดีผู้ใช้/ชื่อไฟล์
 		var query = "INSERT INTO `course_content_file`(`content_id`, `content_file`) VALUES ("+contentid+",'"+path+"')"		
 		//var query = "INSERT INTO course_content_file VALUES("+contentid+",'"+path+"')"
-			console.log(query)
+			
 			connection.query(query)	
 	}	   
   })
@@ -115,7 +115,7 @@ app.get('/course/:id/',function(req,res) {
 	  if(err) throw err;
 	  var id = req.params.id	  
 	  var query = "SELECT * FROM `course` WHERE course_id = "+id+""	
-	  console.log(query);
+	  ;
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
@@ -134,7 +134,7 @@ app.post('/updateuser', function(req,res){
 		var youtube = req.body.youtube
 		var twitter = req.body.twitter		
 		var query = "UPDATE user set fname = '"+fname+"',lname ='"+lname+"',user_img ='"+user_img+"',email='"+email+"',facebook='"+facebook+"',twitter='"+twitter+"', youtube='"+youtube+"' WHERE user_id = "+user_id+""
-		console.log(query)
+		
 		connection.query(query, function(){
 			connection.release();
 		})
@@ -149,7 +149,7 @@ app.post('/insertcoursecontent', function(req,res){
 		var content_des =  req.body.content_des
 		var content_ts = req.body.content_ts
 		var query = "INSERT INTO course_content VALUES("+content_id+","+course_id+",'"+content_title+"','"+content_des+"','"+content_ts+"')"
-		console.log(query)	
+			
 		connection.query(query)
 	});
 });
@@ -165,7 +165,7 @@ app.get('/popularcourse/:branch' , function(req,res){
 	  if(err) throw err;
 	  var branch = req.params.branch	  
 	  var query = "SELECT * from (SELECT course_id, COUNT(course_id) as count FROM user_purchase WHERE branch_id = "+branch+" GROUP BY course_id ORDER BY count DESC limit 5) up, course c, user u WHERE up.course_id = c.course_id and c.user_id = u.user_id"	
-	  console.log(query);
+	  ;
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
@@ -177,7 +177,6 @@ app.get('/popularcourse' , function(req,res){
 	mysqlPool.getConnection(function(err, connection) {
 	  if(err) throw err;	  
 	  var query = "SELECT * from course c , (SELECT course_id, count(course_id) as count from user_purchase GROUP BY course_id ORDER BY count desc limit 4) up,user u WHERE up.course_id = c.course_id and c.user_id = u.user_id"
-	  console.log(query);
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
@@ -195,7 +194,6 @@ app.post('/insertuserpurchase/' , function(req,res){
 	  var user_id = req.body.user_id
 	  var purchase_ts = req.body.purchase_ts
 		var query = "INSERT INTO `user_purchase`(`course_id`, `branch_id`, `user_id`, `purchase_ts`) VALUES ("+course_id+","+branch_id+","+user_id+",'"+purchase_ts+"')"
-	  console.log(query);
 	  connection.query(query);
 	})
 })
@@ -204,8 +202,7 @@ app.get('/userpurchased/:course_id',function(req,res) {
 	mysqlPool.getConnection(function(err, connection) {
 	  if(err) throw err;
 	  var course_id = req.params.course_id	  
-	  var query = "SELECT u.user_id, u.user_img,up.course_id,u.fname,u.lname,up.purchase_ts FROM user u,user_purchase up  WHERE up.user_id = u.user_id AND course_id = "+course_id+" GROUP BY up.purchase_id ORDER BY up.purchase_ts desc"	  
-	  console.log(query);
+	  var query = "SELECT u.user_id, u.user_img,up.course_id,u.fname,u.lname,up.purchase_ts FROM user u,user_purchase up  WHERE up.user_id = u.user_id AND course_id = "+course_id+" GROUP BY up.purchase_id ORDER BY up.purchase_ts desc"	  	 
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
@@ -218,7 +215,6 @@ app.get('/user/:user_id',function(req,res) {
 	  if(err) throw err;
 	  var user_id = req.params.user_id	
 		var query = "SELECT * FROM `user` WHERE user_id = "+user_id+""
-	  console.log(query);
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
@@ -235,13 +231,8 @@ app.post('/insertreview' , function(req,res){
 	  var review_ts = req.body.review_ts
 	  var review_vote = req.body.review_vote
 		var query = "INSERT INTO `course_review`(`course_id`, `user_id`, `review_text`, `review_ts`, `review_vote`) VALUES ("+course_id+","+user_id+",'"+review_text+"','"+review_ts+"',"+review_vote+")"
-	  console.log(query);
+	
 	  connection.query(query);
 	})
 })
-
-
-
-
-
 module.exports = app;
