@@ -39,13 +39,26 @@ app.get('/',function(req,res) {
 	  });
 	});
 });
-
+/*
 app.get('/getcourse/:branchid/',function(req,res) {
 	mysqlPool.getConnection(function(err, connection) {
 	  if(err) throw err;
 	  var branch_id = req.params.branchid
 	  var query = "SELECT c.course_id, c.user_id, c.branch_id, c.subject, c.code, c.price, c.des as des, c.cover as cover, c.ts, c.lastUpdate, u.fname,u.lname,u.user_img,u.facebook,u.twitter,u.youtube from course c, user u WHERE u.user_id = c.user_id AND branch_id = "+branch_id+" ORDER BY c.ts DESC"
 	  ;
+	  connection.query(query, function(err, rows) {
+		res.json(rows);
+		connection.release();
+	  });
+	})
+});
+*/
+
+app.get('/getcourse/:branchid/',function(req,res) {
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+	  var branch_id = req.params.branchid
+    var query = "SELECT c.course_id, c.user_id, c.branch_id, c.subject, c.code, c.price, c.des as des, c.cover as cover, c.ts, c.lastUpdate, u.fname, u.lname, u.user_img, u.email, u.facebook, u.twitter, u.youtube, cr.five , cr.four , cr.three , cr.two , cr.one , ROUND(cr.avg,1) AS avg , cr.length FROM course_rating cr RIGHT JOIN course c ON c.course_id = cr.course_id RIGHT JOIN user u ON u.user_id = c.user_id WHERE c.branch_id = "+branch_id+""
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
@@ -86,7 +99,7 @@ app.post('/insertcourse', function (req,res) {
 			//res.json(rows)
 		res.status(200).send();
 
-		connection.release();
+
 	  });
 	});
 });
@@ -103,7 +116,8 @@ app.post('/upload/:contentid',  upload.any(), function(req, res) {
 		//var query = "INSERT INTO course_content_file VALUES("+contentid+",'"+path+"')"
 
 			connection.query(query)
-	}
+
+	   }
   })
 });
 
@@ -111,7 +125,7 @@ app.get('/course/:id/',function(req,res) {
 	mysqlPool.getConnection(function(err, connection) {
 	  if(err) throw err;
 	  var id = req.params.id
-	  var query = "SELECT * FROM `course` WHERE course_id = "+id+""
+	  var query = "SELECT c.course_id, c.user_id, c.branch_id, c.subject, c.code, c.price, c.des as des, c.cover as cover, c.ts, c.lastUpdate, u.fname, u.lname, u.user_img, u.email, u.facebook, u.twitter, u.youtube, cr.five , cr.four , cr.three , cr.two , cr.one , ROUND(cr.avg,1) AS avg , cr.length FROM course c LEFT JOIN course_rating cr ON c.course_id = cr.course_id LEFT JOIN user u ON u.user_id = c.user_id WHERE c.course_id = "+id+""
 	  ;
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
@@ -133,21 +147,53 @@ app.post('/updateuser', function(req,res){
 		var query = "UPDATE user set fname = '"+fname+"',lname ='"+lname+"',user_img ='"+user_img+"',email='"+email+"',facebook='"+facebook+"',twitter='"+twitter+"', youtube='"+youtube+"' WHERE user_id = "+user_id+""
 
 		connection.query(query, function(){
-			connection.release();
+
 		})
 	});
 });
 
 app.post('/insertcoursecontent', function(req,res){
 	mysqlPool.getConnection(function(error,connection) {
-		var content_id = req.body.content_id
+/*
+    //var content_id = req.body.content_id
 		var course_id = req.body.course_id
 		var content_title = req.body.content_title
 		var content_des =  req.body.content_des
 		var content_ts = req.body.content_ts
-		var query = "INSERT INTO course_content VALUES("+content_id+","+course_id+",'"+content_title+"','"+content_des+"','"+content_ts+"')"
+		//var query = "INSERT INTO course_content VALUES("+content_id+","+course_id+",'"+content_title+"','"+content_des+"','"+content_ts+"')"
+    var query = "INSERT INTO `course_content`(course_id`, `content_title`, `content_des`, `content_ts`) VALUES("+course_id+",'"+content_title+"','"+content_des+"','"+content_ts+"')"
+		//connection.query(query)
 
-		connection.query(query)
+    connection.query(query, function (error, results, fields) {
+      console.log("content_id = " + results.insertId)
+      var data = {
+        content_id: results.insertId
+      }
+      res.json(data);
+      if (error) {
+        return connection.rollback(function() {
+          throw error;
+        });
+      }
+    });
+*/
+    var course_id = req.body.course_id
+		var content_title = req.body.content_title
+		var content_des =  req.body.content_des
+		var content_ts = req.body.content_ts
+    var query = "INSERT INTO `course_content`(`course_id`, `content_title`, `content_des`, `content_ts`) VALUES("+course_id+",'"+content_title+"','"+content_des+"','"+content_ts+"')"
+
+    connection.query(query, function (error, results, fields) {
+    if (error) throw error;
+      console.log("content_id = " + results.insertId);
+    var data = {
+      content_id: results.insertId
+    }
+    res.json(data);
+
+  });
+  console.log(query)
+
 	});
 });
 app.get('/getfile/:contentid/:filename' , function(req,res){
@@ -161,8 +207,7 @@ app.get('/popularcourse/:branch' , function(req,res){
 	mysqlPool.getConnection(function(err, connection) {
 	  if(err) throw err;
 	  var branch = req.params.branch
-	  var query = "SELECT * from (SELECT course_id, COUNT(course_id) as count FROM user_purchase WHERE branch_id = "+branch+" GROUP BY course_id ORDER BY count DESC limit 5) up, course c, user u WHERE up.course_id = c.course_id and c.user_id = u.user_id"
-	  ;
+	  var query = "SELECT c.course_id, c.user_id, c.branch_id, c.subject, c.code, c.price, c.des as des, c.cover as cover, c.ts, c.lastUpdate, u.fname, u.lname, u.user_img,u.email, u.facebook, u.twitter, u.youtube, cr.five , cr.four , cr.three , cr.two , cr.one , ROUND(cr.avg,1) AS avg , cr.length FROM (SELECT course_id, COUNT(course_id) as count FROM user_purchase WHERE branch_id = "+branch+" GROUP BY course_id ORDER BY count DESC limit 5) up LEFT JOIN course c ON c.course_id = up.course_id LEFT JOIN course_rating cr ON cr.course_id = up.course_id LEFT JOIN user u ON u.user_id = c.user_id"
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
@@ -173,15 +218,13 @@ app.get('/popularcourse/:branch' , function(req,res){
 app.get('/popularcourse' , function(req,res){
 	mysqlPool.getConnection(function(err, connection) {
 	  if(err) throw err;
-	  var query = "SELECT * from course c , (SELECT course_id, count(course_id) as count from user_purchase GROUP BY course_id ORDER BY count desc limit 4) up,user u WHERE up.course_id = c.course_id and c.user_id = u.user_id"
-	  connection.query(query, function(err, rows) {
+	  var query = "SELECT c.course_id, c.user_id, c.branch_id, c.subject, c.code, c.price, c.des as des, c.cover as cover, c.ts, c.lastUpdate, u.fname, u.lname, u.user_img, u.email, u.facebook, u.twitter, u.youtube, cr.five , cr.four , cr.three , cr.two , cr.one , ROUND(cr.avg,1) AS avg , cr.length FROM (SELECT course_id, count(course_id) as count from user_purchase GROUP BY course_id ORDER BY count desc limit 4) up LEFT JOIN course c ON c.course_id = up.course_id LEFT JOIN course_rating cr ON cr.course_id = up.course_id LEFT JOIN user u ON u.user_id = c.user_id"
+    connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
 	  });
 	})
 })
-
-
 
 app.post('/insertuserpurchase/' , function(req,res){
 	mysqlPool.getConnection(function(err, connection) {
@@ -192,6 +235,7 @@ app.post('/insertuserpurchase/' , function(req,res){
 	  var purchase_ts = req.body.purchase_ts
 		var query = "INSERT INTO `user_purchase`(`course_id`, `branch_id`, `user_id`, `purchase_ts`) VALUES ("+course_id+","+branch_id+","+user_id+",'"+purchase_ts+"')"
 	  connection.query(query);
+
 	})
 })
 
@@ -199,7 +243,7 @@ app.get('/userpurchased/:course_id',function(req,res) {
 	mysqlPool.getConnection(function(err, connection) {
 	  if(err) throw err;
 	  var course_id = req.params.course_id
-	  var query = "SELECT u.user_id, u.user_img,up.course_id,u.fname,u.lname, DATE_FORMAT(up.purchase_ts, '%Y-%m-%d %H:%i:%s') AS purchase_ts FROM user u,user_purchase up  WHERE up.user_id = u.user_id AND course_id = "+course_id+" GROUP BY up.purchase_id ORDER BY purchase_ts desc"
+	  var query = "SELECT u.user_id, u.user_img,up.course_id,u.fname,u.lname, DATE_FORMAT(up.purchase_ts, '%Y-%m-%d %H:%i:%s') AS purchase_ts FROM user u,user_purchase up  WHERE up.user_id = u.user_id AND course_id = "+course_id+" GROUP BY up.user_id ORDER BY purchase_ts desc"
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
@@ -286,6 +330,7 @@ app.post('/insertchat' , function(req,res){
 		var query = "INSERT INTO `course_chat`(`course_id`, `user_id`, `chat_text`, `chat_ts`) VALUES ("+course_id+","+user_id+",'"+chat_text+"','"+chat_ts+"')"
 
 	  connection.query(query);
+
 	})
 })
 
@@ -294,8 +339,7 @@ app.get('/get_course_chat/:courseid',function(req,res) {
 	mysqlPool.getConnection(function(err, connection) {
 	  if(err) throw err;
 	  var course_id = req.params.courseid;
-	  var query = "SELECT `chat_id`, `course_id`, `user_id`, `chat_text`, DATE_FORMAT(`chat_ts`, '%Y-%m-%d %H:%i:%s') AS chat_ts FROM `course_chat` WHERE `course_id` = "+course_id+" ORDER BY chat_ts ASC"
-
+	  var query = "SELECT cc.chat_id, cc.course_id, cc.user_id, cc.chat_text, DATE_FORMAT(cc.chat_ts, '%Y-%m-%d %H:%i:%s') AS chat_ts , u.fname , u.lname , u.user_img FROM course_chat cc LEFT JOIN user u ON cc.user_id = u.user_id WHERE cc.course_id = "+course_id+" ORDER BY chat_ts ASC"
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
@@ -362,7 +406,8 @@ app.get('/get_course_announce_comment/:annouid',function(req,res) {
 // post course_announce
 app.post('/insertcourse_announce' , function(req,res){
 	mysqlPool.getConnection(function(err, connection) {
-	  if(err) throw err;
+/*
+    if(err) throw err;
     var annou_id = req.body.annou_id;
 	  var course_id = req.body.course_id;
 	  var annou_text = req.body.annou_text
@@ -370,6 +415,25 @@ app.post('/insertcourse_announce' , function(req,res){
 		var query = "INSERT INTO `course_announce`(`annou_id`,`course_id`, `annou_text`, `annou_ts`) VALUES ("+annou_id+","+course_id+",'"+annou_text+"','"+annou_ts+"')"
 
 	  connection.query(query);
+*/
+
+
+    if(err) throw err;
+	  var course_id = req.body.course_id;
+	  var annou_text = req.body.annou_text
+	  var annou_ts = req.body.annou_ts;
+    var query = "INSERT INTO `course_announce`(`course_id`, `annou_text`, `annou_ts`) VALUES ("+course_id+",'"+annou_text+"','"+annou_ts+"')"
+
+    connection.query(query, function (error, results, fields) {
+    if (error) throw error;
+      console.log("annou_id= " + results.insertId);
+    var data = {
+      annou_id: results.insertId
+    }
+    res.json(data);
+
+  });
+  console.log(query)
 	})
 })
 
@@ -384,6 +448,7 @@ app.post('/insertcourse_announce_comment' , function(req,res){
 		var query = "INSERT INTO `course_announce_comment`(`annou_id`, `user_id`, `annou_com_text`, `annou_com_ts`) VALUES ("+annou_id+","+user_id+",'"+annou_com_text+"','"+annou_com_ts+"')"
 
 	  connection.query(query);
+
 	})
 })
 
@@ -392,8 +457,7 @@ app.get('/get_course_q/:courseid',function(req,res) {
 	mysqlPool.getConnection(function(err, connection) {
 	  if(err) throw err;
 	  var course_id = req.params.courseid;
-	  var query = "SELECT `q_id`, `course_id`, `user_id`, `q_text`, DATE_FORMAT(`q_ts`, '%Y-%m-%d %H:%i:%s') AS q_ts FROM `course_q` WHERE `course_id` = "+course_id+" ORDER BY q_ts DESC"
-
+	  var query = "SELECT cq.q_id, cq.course_id, cq.user_id, cq.q_title, cq.q_des , DATE_FORMAT(cq.q_ts, '%Y-%m-%d %H:%i:%s') AS q_ts , u.fname , u.lname , u.user_img FROM `course_q` cq , user u WHERE cq.course_id = "+course_id+" AND u.user_id = cq.user_id ORDER BY q_ts DESC"
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
@@ -406,9 +470,8 @@ app.get('/get_course_q_comment/:qid',function(req,res) {
 	mysqlPool.getConnection(function(err, connection) {
 	  if(err) throw err;
 	  var q_id = req.params.qid;
-	  var query = "SELECT `q_com_id`, `q_id`, `user_id`, `q_com_text`, DATE_FORMAT(`q_com_ts`, '%Y-%m-%d %H:%i:%s') AS q_com_ts FROM `course_q_comment` WHERE `q_id` = "+q_id+""
-
-	  connection.query(query, function(err, rows) {
+	  var query = "SELECT cqm.q_com_id, cqm.q_id, cqm.user_id, cqm.q_com_text, DATE_FORMAT(cqm.q_com_ts, '%Y-%m-%d %H:%i:%s') AS q_com_ts , u.fname , u.lname , u.user_img FROM course_q_comment cqm , user u WHERE cqm.q_id = "+q_id+" AND cqm.user_id = u.user_id"
+    connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
 	  });
@@ -418,15 +481,36 @@ app.get('/get_course_q_comment/:qid',function(req,res) {
 // post course_q
 app.post('/insertcourse_q' , function(req,res){
 	mysqlPool.getConnection(function(err, connection) {
-	  if(err) throw err;
-    var q_id = req.body.q_id;
+	 /* if(err) throw err;
+    //var q_id = req.body.q_id;
 	  var course_id = req.body.course_id;
     var user_id = req.body.user_id
-	  var q_text = req.body.q_text
+	  var q_title = req.body.q_title
+    var q_des = req.body.q_des
 	  var q_ts = req.body.q_ts;
-		var query = "INSERT INTO `course_q`(`q_id`,`course_id`, `user_id`, `q_text`, `q_ts`) VALUES ("+q_id+","+course_id+","+user_id+",'"+q_text+"','"+q_ts+"')"
+		var query = "INSERT INTO `course_q`(`course_id`, `user_id`, `q_title`, `q_des`, `q_ts`) VALUES ("+course_id+","+user_id+",'"+q_title+"','"+q_des+"','"+q_ts+"')"
 
 	  connection.query(query);
+*/
+
+    if(err) throw err;
+	  var course_id = req.body.course_id;
+    var user_id = req.body.user_id
+	  var q_title = req.body.q_title
+    var q_des = req.body.q_des
+	  var q_ts = req.body.q_ts;
+    var query = "INSERT INTO `course_q`(`course_id`, `user_id`, `q_title`, `q_des`, `q_ts`) VALUES ("+course_id+","+user_id+",'"+q_title+"','"+q_des+"','"+q_ts+"')"
+
+    connection.query(query, function (error, results, fields) {
+    if (error) throw error;
+      console.log("q_id= " + results.insertId);
+    var data = {
+      q_id: results.insertId
+    }
+    res.json(data);
+
+  });
+  console.log(query)
 	})
 })
 
@@ -436,12 +520,263 @@ app.post('/insertcourse_q_comment' , function(req,res){
 	  if(err) throw err;
 	  var q_id = req.body.q_id;
     var user_id = req.body.user_id
-	  var q_com_text = req.body.q_text
-	  var q_com_ts = req.body.q_ts;
+	  var q_com_text = req.body.q_com_text
+	  var q_com_ts = req.body.q_com_ts;
 		var query = "INSERT INTO `course_q_comment`(`q_id`, `user_id`, `q_com_text`, `q_com_ts`) VALUES ("+q_id+","+user_id+",'"+q_com_text+"','"+q_com_ts+"')"
 
 	  connection.query(query);
+
 	})
 })
+
+//get notification
+app.get('/get_notification/:userid/:notitype',function(req,res) {
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+	  var user_id = req.params.userid
+    var noti_type = req.params.notitype
+	  var query =  "SELECT n.noti_id , n.course_id ,n.user_id , c.subject , c.code , n.noti_des , n.noti_cover , u.fname AS fname_sender , u.lname AS lname_sender, DATE_FORMAT(n.noti_ts, '%Y-%m-%d %H:%i:%s') AS noti_ts FROM notification n LEFT JOIN course c ON n.course_id = c.course_id LEFT JOIN user u ON c.user_id = u.user_id WHERE n.noti_type = "+noti_type+" AND n.user_id = "+user_id+" ORDER BY n.noti_ts DESC LIMIT 0,10"
+    connection.query(query, function(err, rows) {
+		res.json(rows);
+		connection.release();
+	  });
+	})
+})
+
+
+// post notification
+app.post('/insertnotification' , function(req,res){
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+	  var course_id = req.body.course_id;
+    var user_id = req.body.user_id
+	  var noti_cover = req.body.noti_cover
+	  var noti_des = req.body.noti_des
+    var noti_type = req.body.noti_type
+    var noti_ts = req.body.noti_ts
+		var query = "INSERT INTO `notification`( `course_id`, `user_id`, `noti_cover`, `noti_des`, `noti_type`, `noti_ts`) VALUES ("+course_id+","+user_id+",'"+noti_cover+"','"+noti_des+"',"+noti_type+",'"+noti_ts+"')"
+	  connection.query(query);
+
+	})
+})
+
+// insert user into room chat
+app.post('/insertusertoroom' , function(req,res){
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+	  var course_id = req.body.course_id;
+    var user_id = req.body.user_id
+		var query = "INSERT INTO `room_chat`(`course_id`, `user_id`) VALUES ("+course_id+","+user_id+")"
+    connection.query(query);
+	})
+})
+
+// delete user from chat room
+app.post('/deleteuserfromroom' , function(req,res){
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+    var course_id = req.body.course_id;
+    var user_id = req.body.user_id
+		var query = "DELETE FROM `room_chat` WHERE user_id = "+user_id+" AND course_id = "+course_id+""
+    connection.query(query);
+    connection.release();
+	})
+})
+
+// get all user who is in chat room of any course
+app.get('/get_userinroom/:courseid',function(req,res) {
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+    var course_id = req.params.courseid
+	  var query =  "SELECT rc.session_id , rc.course_id , rc.user_id , u.fname , u.lname , u.user_img FROM room_chat rc LEFT JOIN user u ON rc.user_id = u.user_id WHERE rc.course_id = "+course_id+""
+    connection.query(query, function(err, rows) {
+		res.json(rows);
+		connection.release();
+	  });
+	})
+})
+
+// get all course which is user purchased
+app.get('/get_all_userpurchased/:userid',function(req,res) {
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+    var user_id = req.params.userid
+	  var query =  "SELECT c.course_id, c.user_id, c.branch_id, c.subject, c.code, c.price, c.des as des, c.cover as cover, c.ts, c.lastUpdate, u.fname, u.lname, u.user_img, u.email, u.facebook, u.twitter, u.youtube, cr.five , cr.four , cr.three , cr.two , cr.one , ROUND(cr.avg,1) AS avg , cr.length FROM user_purchase up JOIN course c ON c.course_id = up.course_id JOIN user u ON u.user_id = c.user_id JOIN course_rating cr ON c.course_id = cr.course_id WHERE up.user_id = "+user_id+" GROUP BY up.course_id ORDER BY c.lastUpdate DESC"
+    connection.query(query, function(err, rows) {
+		res.json(rows);
+		connection.release();
+	  });
+	})
+})
+
+// get all course which is owner
+app.get('/get_all_userowner/:userid',function(req,res) {
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+    var user_id = req.params.userid
+	  var query =  "SELECT c.course_id, c.user_id, c.branch_id, c.subject, c.code, c.price, c.des as des, c.cover as cover, c.ts, c.lastUpdate, u.fname, u.lname, u.user_img, u.email, u.facebook, u.twitter, u.youtube, cr.five , cr.four , cr.three , cr.two , cr.one , ROUND(cr.avg,1) AS avg , cr.length FROM course c JOIN user u ON u.user_id = c.user_id JOIN course_rating cr ON c.course_id = cr.course_id WHERE u.user_id = "+user_id+" GROUP BY c.course_id ORDER BY c.lastUpdate DESC"
+    connection.query(query, function(err, rows) {
+		res.json(rows);
+		connection.release();
+	  });
+	})
+})
+
+// get all course which is user_favorite
+app.get('/get_all_userfavorite/:userid',function(req,res) {
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+    var user_id = req.params.userid
+	  var query =  "SELECT c.course_id, c.user_id, c.branch_id, c.subject, c.code, c.price, c.des as des, c.cover as cover, c.ts, c.lastUpdate, u.fname, u.lname, u.user_img, u.email, u.facebook, u.twitter, u.youtube, cr.five , cr.four , cr.three , cr.two , cr.one , ROUND(cr.avg,1) AS avg , cr.length FROM user_favorite uf JOIN course c ON uf.course_id = c.course_id JOIN user u ON u.user_id = c.user_id JOIN course_rating cr ON c.course_id = cr.course_id WHERE uf.user_id = "+user_id+" GROUP BY c.course_id"
+    connection.query(query, function(err, rows) {
+		res.json(rows);
+		connection.release();
+	  });
+	})
+})
+
+// insert user_favorite
+app.post('/insertusertoroom' , function(req,res){
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+	  var course_id = req.body.course_id;
+    var user_id = req.body.user_id
+		var query = "INSERT INTO `user_favorite`(`course_id`, `user_id`) VALUES ("+course_id+","+user_Id+")"
+    connection.query(query);
+	})
+})
+
+///////////////// REGISTER ////////////////////////////////
+
+//post to user table and user_login for new user
+app.post('/insertnewuser' , function(req,res){
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+    var user_id = req.body.user_id
+		var fname = req.body.fname
+		var lname = req.body.lname
+		var user_img = req.body.user_img
+    var sex = req.body.sex
+    var birthday = req.body.birthday
+		var email = req.body.email
+		var facebook = req.body.facebook
+		var twitter = req.body.twitter
+    var youtube = req.body.youtube
+    var user_name = req.body.user_name
+    var user_pass = req.body.user_pass
+    var user_ts = req.body.user_ts
+
+    var query1 = "INSERT INTO user(`fname`, `lname`, `user_img`, `sex`, `birthday`, `email`, `facebook`, `twitter`, `youtube`) VALUES ('"+fname+"','"+lname+"','"+user_img+"','"+sex+"','"+birthday+"','"+email+"','"+facebook+"','"+twitter+"','"+youtube+"');"
+    connection.beginTransaction(function(err) {
+	  if (err) { throw err; }
+	  connection.query(query1, function (error, results, fields) {
+      console.log("test id1" + results.insertId)
+      var data = {
+        user_id : results.insertId
+      }
+      res.json(data);
+	    if (error) {
+	      return connection.rollback(function() {
+	        throw error;
+	      });
+	    }
+
+	    var query2 = "INSERT INTO user_login(`user_id`, `user_name`, `user_pass`, `user_ts`) VALUES ((SELECT user_id FROM user WHERE email = '"+email+"'),'"+user_name+"',SHA2('"+user_pass+"',512),'"+user_ts+"');"
+	    connection.query(query2, function (error, results, fields) {
+	      if (error) {
+	        return connection.rollback(function() {
+	          throw error;
+	        });
+	      }
+	      connection.commit(function(err) {
+	        if (err) {
+	          return connection.rollback(function() {
+	            throw err;
+	          });
+	        }
+
+	        console.log('success!');
+	      });
+	    });
+	  });
+
+
+	});
+
+	})
+
+
+})
+
+///////////////// END REGISTER ////////////////////////////////
+
+///////////////// LOGIN ////////////////////////////////
+
+// get respone to check password
+app.get('/get_check_password/:username/:password',function(req,res) {
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+    var user_name = req.params.username
+    var user_pass = req.params.password
+	  var query =  "SELECT COUNT(*) AS check_pass ,user_id FROM user_login WHERE user_name = '"+user_name+"' AND user_pass = SHA2('"+user_pass+"' , 512)" //if password is correct , it'll return 1
+    connection.query(query, function(err, rows) {
+		res.json(rows);
+		connection.release();
+	  });
+	})
+})
+
+// get respone to check username
+app.get('/get_check_username/:username/',function(req,res) {
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+    var user_name = req.params.username
+	  var query =  "SELECT COUNT(*) as check_username from user_login WHERE user_name = '"+user_name+"'" //if username is correct , it'll return 1
+    connection.query(query, function(err, rows) {
+		res.json(rows);
+		connection.release();
+	  });
+	})
+})
+
+// get respone to check email
+app.get('/get_check_email/:email/',function(req,res) {
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+    var email = req.params.email
+	  var query =  "SELECT COUNT(*) as check_email from user WHERE email = '"+email+"'" //if email is correct , it'll return 1
+    connection.query(query, function(err, rows) {
+		res.json(rows);
+		connection.release();
+	  });
+	})
+})
+///////////////// END LOGIN ////////////////////////////////
+
+
+app.get('/get_notification_type1/',function(req,res) {
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+	var query = "SELECT n.course_id,c.subject,c.code,n.user_id,u.fname,u.lname,u.user_img, n.noti_cover, n.noti_des, n.noti_type, n.noti_ts FROM `notification` n INNER JOIN user u ON u.user_id = n.user_id INNER JOIN course c ON c.course_id = n.course_id WHERE noti_type = 1 ORDER BY noti_ts DESC limit 10"
+	  connection.query(query, function(err, rows) {
+		res.json(rows);
+		connection.release();
+	  });
+	})
+})
+
+app.get('/get_notification_type2/:course_id',function(req,res) {
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+	  var course_id = req.params.course_id
+	  var query = "SELECT n.course_id,n.user_id,u.fname,u.lname,u.user_img, n.noti_cover, n.noti_des, n.noti_type, n.noti_ts FROM `notification` n INNER JOIN user u ON u.user_id = n.user_id WHERE course_id IN ("+course_id+") AND noti_type = 2 ORDER BY noti_ts DESC limit 10"
+	  connection.query(query, function(err, rows) {
+		res.json(rows);
+		connection.release();
+	  });
+	})
+})
+
+
 
 module.exports = app;

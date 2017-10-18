@@ -22,65 +22,72 @@ io.on('connection', function (socket) {
       console.log('room: ' + room)
     })
     socket.on('private_message' ,function (data) {
-      io.to(data.room).emit('private_message', data)
+      io.to(data.course_id).emit('private_message', data)
     })
     socket.on('live_message' ,function (data) {
       console.log('live_message')
-      io.to(data.room).emit('live_message', data)
+      io.to(data.course_id).emit('live_message', data)
     })
+
     socket.on('live_tutor', function (data) {
-      io.to(data.room).emit('live_tutor', data)
+      io.to(data.course_id).emit('live_tutor', data)
     })
     socket.on('stoplive' ,function (data) {
-      io.to(data.room).emit('stoplive', data)
+      io.to(data.course_id).emit('stoplive', data)
     })
     socket.on('requestCamera' ,function (data) {
-      io.to(data.room).emit('requestCamera', data)
+      io.to(data.course_id).emit('requestCamera', data)
     })
     socket.on('refuseCamera' ,function (data) {
-      io.to(data.room).emit('refuseCamera', data)
+      io.to(data.course_id).emit('refuseCamera', data)
     })
     socket.on('allowCamera', function(data) {
-      io.to(data.room).emit('allowCamera', data)
+      io.to(data.course_id).emit('allowCamera', data)
     })
     socket.on('live_cam_1', function(data) {
-      io.to(data.room).emit('live_cam_1', data)
+      io.to(data.course_id).emit('live_cam_1', data)
     })
     socket.on('live_cam_2', function(data) {
-      io.to(data.room).emit('live_cam_2', data)
+      io.to(data.course_id).emit('live_cam_2', data)
     })
     socket.on('live_cam_3', function(data) {
-      io.to(data.room).emit('live_cam_3', data)
+      io.to(data.course_id).emit('live_cam_3', data)
     })
     socket.on('live_cam_4', function(data) {
-      io.to(data.room).emit('live_cam_4', data)
+      io.to(data.course_id).emit('live_cam_4', data)
     })
     socket.on('stopCamera' ,function (data) {
       console.log('stopCamera')
-      io.to(data.room).emit('stopCamera', data)
+      io.to(data.course_id).emit('stopCamera', data)
     })
     socket.on('forceStopCamera',function (data) {
       console.log('forceStopCamera')
-      io.to(data.room).emit('forceStopCamera', data)
+      io.to(data.course_id).emit('forceStopCamera', data)
     })
     socket.on('announcement', function (data) {
-      io.to(data.room).emit('announcement', data)
+      io.to(data.course_id).emit('announcement', data)
     })
+		socket.on('announcement_comment', function (data) {
+			io.to(data.course_id).emit('announcement_comment', data)
+		})
     socket.on('qa', function (data) {
-      io.to(data.room).emit('qa', data)
+      io.to(data.course_id).emit('qa', data)
     })
+		socket.on('qa_comment', function (data) {
+			io.to(data.course_id).emit('qa_comment', data)
+		})
     socket.on('courseContent', function (data) {
-      io.to(data.room).emit('courseContent', data)
+      io.to(data.course_id).emit('courseContent', data)
     })
     socket.on('chat', function (data) {
-      io.to(data.room).emit('chat', data)
+      io.to(data.course_id).emit('chat', data)
     })
     socket.on('course', function (data) {
-      io.to(data.room).emit('course', data)
+      io.to(data.course_id).emit('course', data)
     })
 	  socket.on('PUSH_COURSE', function (data) {
-		console.log('PUSH_COURSE: ' + data.room);
-      //io.to(data.room).emit('PUSH_COURSE', data)
+		console.log('PUSH_COURSE: ' + data.course_id);
+      //io.to(data.course_id).emit('PUSH_COURSE', data)
 	  io.emit('PUSH_COURSE', data)
     })
 	  socket.on('voting', function (data) {
@@ -88,14 +95,31 @@ io.on('connection', function (socket) {
     })
     socket.on('course_review', function (data) {
       io.emit('course_review', data)
-    }) 
+    })
     socket.on('course_user_purchased', function (data) {
       io.emit('course_user_purchased', data)
-    })     
+    })
+		socket.on('online', function (data) {
+			socket.join(data.course_id)
+			io.to(data.course_id).emit('online', data)
+		})
+		socket.on('offline', function (data) {
+			socket.leave(data.course_id)
+			io.to(data.course_id).emit('offline', data)
+		})
+		socket.on('noti_course', function (data) {
+			io.emit('noti_course', data)
+		})
+		socket.on('noti_content', function (data) {
+			io.emit('noti_content', data)
+		})
+		socket.on('noti_annountment', function (data) {
+			io.emit('noti_annountment', data)
+		})
 })
 var api = require('./api.js');
 app.use('/api', api);
 var port = 4000;
-server.listen(port ,function(){ 
+server.listen(port ,function(){
 console.log('server running on port: ' + port);
 });
