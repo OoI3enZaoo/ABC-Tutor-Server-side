@@ -5,22 +5,90 @@ var server = http.createServer(app);
 var io = require('socket.io').listen(server);
 var cors = require('cors')
 var bodyParser = require("body-parser");
+var mysql = require('mysql');
+var omise = require('omise')({
+  'secretKey': 'skey_test_5a1j2ntf48hwtsp877s',
+  'omiseVersion': '2015-09-10'
+});
+var mysqlPool = mysql.createPool({
+    host     : '172.104.167.197',
+    user     : 'root',
+    password : 'my-secret-pw',
+    database : 'tutordb'
+});
+app.use(bodyParser.urlencoded({
+    extended: false
+}));
 app.use(cors({credentials: true}));
 
-//app.use(bodyParser.json());
-//app.use(bodyParser({limit: '100mb'}));
-//app.use(bodyParser.urlencoded({limit: '100mb'}));
-app.use(bodyParser.json({limit:1024102420, type:'application/json'}));
 
 app.get('/',function(req,res) {
 	res.send('for socker.ioo');
 });
+app.post('/checkout/:course_id/:branch_id/:user_id/:ts', function(req, res ,next) {
+  var token = req.body.omiseToken
+  var course_id = req.params.course_id
+  var branch_id = req.params.branch_id
+  var user_id = req.params.user_id
+  var purchase_ts = req.params.ts
+
+  //console.log(course_id + " " + branch_id +" " +user_id+" "+ purchase_ts );
+  //console.log(req.body)
+
+    omise.charges.create({
+    'amount': '10025', // 10 Baht
+    'currency': 'thb',
+    'card': token
+  }, function(err, resp) {
+    if (resp.paid) {
+      //Success
+      //res.send('success')
+
+	let data = {
+		  user_id: user_id,
+		  course_id: course_id,
+		  branch_id: branch_id,
+		  purchase_ts:purchase_ts
+
+	  }
+		io.to(user_id).emit('purchase', data)
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+
+	  var query = "INSERT INTO `user_purchase`(`course_id`, `branch_id`, `user_id`, `purchase_ts`) VALUES ("+course_id+","+branch_id+","+user_id+",'"+purchase_ts+"')"
+	  connection.query(query);
+
+	})
+
+
+    } else {
+      //Handle failure
+      res.send('fail' + err)
+      throw resp.failure_code;
+    }
+  });
+})
+
+
 io.on('connection', function (socket) {
     console.log('user connected: ' + socket.id);
-    socket.on('subscribe', function (room) {
-      socket.join(room)
-      console.log('room: ' + room)
+    socket.on('subscribe', function (course_id) {
+      socket.join(course_id)
+      console.log('subscribe: ' + course_id)
     })
+    socket.on('unsubscribe', function (course_id) {
+      socket.leave(course_id)
+      console.log('unsubscribe: ' + course_id)
+    })
+    socket.on('join', function (user_id) {
+    	console.log('user join: ' + user_id)
+		socket.join(user_id)
+	})
+	socket.on('leave', function (user_id) {
+		console.log('user leave: ' + user_id)
+		socket.leave(user_id)
+	})
+
     socket.on('private_message' ,function (data) {
       io.to(data.course_id).emit('private_message', data)
     })
@@ -111,11 +179,16 @@ io.on('connection', function (socket) {
 			io.emit('noti_course', data)
 		})
 		socket.on('noti_content', function (data) {
-			io.emit('noti_content', data)
+			io.to(data.course_id).emit('noti_content', data)
 		})
 		socket.on('noti_annountment', function (data) {
-			io.emit('noti_annountment', data)
+			console.log("noti_annountment:" + data)
+			io.to(data.course_id).emit('noti_annountment', data)
 		})
+		socket.on('update_course', function (data) {
+			io.emit('update_course', data)
+		})		
+
 })
 var api = require('./api.js');
 app.use('/api', api);

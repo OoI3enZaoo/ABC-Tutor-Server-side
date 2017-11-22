@@ -2,7 +2,9 @@ var Express = require('express')
 var mysql = require('mysql')
 var multer  = require('multer')
 var fs = require('fs');
+var bodyParser = require("body-parser");
 var app = new Express()
+app.use(bodyParser.json({limit:1024102420}));
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
 	 var firstPath = 'uploads'
@@ -380,8 +382,7 @@ app.get('/get_course_announce/:courseid',function(req,res) {
 	mysqlPool.getConnection(function(err, connection) {
 	  if(err) throw err;
 	  var course_id = req.params.courseid;
-	  var query = "SELECT `annou_id`, `course_id`, `annou_text`, DATE_FORMAT(`annou_ts`, '%Y-%m-%d %H:%i:%s') AS annou_ts FROM `course_announce` WHERE `course_id` = "+course_id+" ORDER BY annou_ts DESC"
-
+	  var query = "SELECT ca.annou_id, ca.course_id, ca.annou_text, DATE_FORMAT(ca.annou_ts, '%Y-%m-%d %H:%i:%s') AS annou_ts , u.user_id , u.fname , u.lname , u.user_img FROM course_announce ca INNER JOIN course c ON ca.course_id = c.course_id INNER JOIN user u ON c.user_id = u.user_id WHERE ca.course_id = "+course_id+" ORDER BY annou_ts DESC"
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
@@ -394,8 +395,7 @@ app.get('/get_course_announce_comment/:annouid',function(req,res) {
 	mysqlPool.getConnection(function(err, connection) {
 	  if(err) throw err;
 	  var annou_id = req.params.annouid;
-	  var query = "SELECT `annou_com_id`, `annou_id`, `user_id`, `annou_com_text`, DATE_FORMAT(`annou_com_ts`, '%Y-%m-%d %H:%i:%s') AS annou_com_ts FROM `course_announce_comment` WHERE `annou_id` = "+annou_id+""
-
+	  var query = "SELECT cac.annou_com_id, cac.annou_id, cac.user_id, cac.annou_com_text, DATE_FORMAT(cac.annou_com_ts, '%Y-%m-%d %H:%i:%s') AS annou_com_ts , u.user_id , u.fname , u.lname , u.user_img FROM course_announce_comment cac INNER JOIN user u ON cac.user_id = u.user_id WHERE cac.annou_id =  "+annou_id+""
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
@@ -681,7 +681,7 @@ app.post('/insertnewuser' , function(req,res){
 	      });
 	    }
 
-	    var query2 = "INSERT INTO user_login(`user_id`, `user_name`, `user_pass`, `user_ts`) VALUES ((SELECT user_id FROM user WHERE email = '"+email+"'),'"+user_name+"',SHA2('"+user_pass+"',512),'"+user_ts+"');"
+	    var query2 = "INSERT INTO user_login(`user_id`, `user_name`, `user_pass`, `user_ts`) VALUES ((SELECT user_id FROM user WHERE email = '"+email+"'),'"+user_name+"',AES_ENCRYPT(SHA2('"+user_pass+"',512), '"+user_ts+"' ),'"+user_ts+"');"
 	    connection.query(query2, function (error, results, fields) {
 	      if (error) {
 	        return connection.rollback(function() {
@@ -718,7 +718,7 @@ app.get('/get_check_password/:username/:password',function(req,res) {
 	  if(err) throw err;
     var user_name = req.params.username
     var user_pass = req.params.password
-	  var query =  "SELECT COUNT(*) AS check_pass ,user_id FROM user_login WHERE user_name = '"+user_name+"' AND user_pass = SHA2('"+user_pass+"' , 512)" //if password is correct , it'll return 1
+	  var query =  "SELECT COUNT(*) AS check_pass ,user_id FROM user_login WHERE user_name = '"+user_name+"' AND user_pass = CONVERT(AES_ENCRYPT(SHA2('"+user_pass+"',512), user_ts) ,BINARY(200))" //if password is correct , it'll return 1
     connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
@@ -776,6 +776,47 @@ app.get('/get_notification_type2/:course_id',function(req,res) {
 	  });
 	})
 })
+app.get('/get_all_my_user/:userid',function(req,res) {
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+	  var user_id = req.params.userid
+		var query = "SELECT COUNT(*) AS student_count FROM (SELECT c.course_id , c.user_id FROM course c INNER JOIN user u ON c.user_id = u.user_id WHERE c.user_id = "+user_id+") own INNER JOIN user_purchase up ON up.course_id = own.course_id"
+		connection.query(query, function(err, rows) {
+			res.json(rows);
+			connection.release();
+		});
+	})
+})
+app.get('/get_all_my_review/:userid',function(req,res) {
+	mysqlPool.getConnection(function(err, connection) {
+	  if(err) throw err;
+	  var user_id = req.params.userid
+		var query = "SELECT COUNT(*) AS review_count FROM (SELECT c.course_id , c.user_id FROM course c INNER JOIN user u ON c.user_id = u.user_id WHERE c.user_id = "+user_id+") own INNER JOIN course_review cr ON cr.course_id = own.course_id"
+		connection.query(query, function(err, rows) {
+			res.json(rows);
+			connection.release();
+		});
+	})
+})
+
+app.post('/updatecourse', function(req,res){
+	mysqlPool.getConnection(function(error,connection) {
+    var course_id = req.body.course_id
+    var branch_id = req.body.branch_id
+    var subject = req.body.subject
+    var code = req.body.code
+    var price = req.body.price
+    var des = req.body.des
+    var cover = req.body.cover
+    var coupon = req.body.coupon
+
+
+		var query = "UPDATE `course` SET `branch_id`= "+branch_id+" ,`subject`= '"+subject +"',`code`= '"+code +"',`price`= '"+price +"' ,`des`= '"+des+"',`cover`= '"+cover+"',`coupon`= '"+coupon+"' WHERE course_id = "+course_id+""
+		connection.query(query, function(){
+
+		})
+	});
+});
 
 
 
