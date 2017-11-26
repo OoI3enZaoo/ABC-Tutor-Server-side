@@ -4,6 +4,21 @@ var multer  = require('multer')
 var fs = require('fs');
 var bodyParser = require("body-parser");
 var app = new Express()
+var mongojs = require('mongojs');
+var db = mongojs('mongodb://172.104.167.197:27017/tutor', ['course_chat']);
+//var db = mongojs('mongodb://benkung:1320@ds061345.mlab.com:61345/bendb', ['data_info','pic_info']);
+
+db.on('connect', function() {
+    console.log('mongoDB connected')
+});
+db.on('error', function(err) {
+    console.log('mongoDB error', err)
+});
+
+db.course_chat.find(function (err, docs) {
+	console.log(docs);
+})
+
 app.use(bodyParser.json({limit:1024102420}));
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -38,6 +53,8 @@ app.get('/',function(req,res) {
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+
+    res.end();
 	  });
 	});
 });
@@ -64,6 +81,8 @@ app.get('/getcourse/:branchid/',function(req,res) {
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+    res.end();
+
 	  });
 	})
 });
@@ -77,6 +96,7 @@ app.get('/courselength/:branchid',function(req,res) {
 	  connection.query(query , function(err, rows) {
 		res.json(rows);
 		connection.release();
+    res.end();
 	  });
 	});
 });
@@ -100,7 +120,7 @@ app.post('/insertcourse', function (req,res) {
 		connection.query(query, function(err, rows) {
 			//res.json(rows)
 		res.status(200).send();
-
+    res.end();
 
 	  });
 	});
@@ -120,6 +140,7 @@ app.post('/upload/:contentid',  upload.any(), function(req, res) {
 			connection.query(query)
 
 	   }
+       res.end();
   })
 });
 
@@ -132,6 +153,7 @@ app.get('/course/:id/',function(req,res) {
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 });
@@ -149,7 +171,7 @@ app.post('/updateuser', function(req,res){
 		var query = "UPDATE user set fname = '"+fname+"',lname ='"+lname+"',user_img ='"+user_img+"',email='"+email+"',facebook='"+facebook+"',twitter='"+twitter+"', youtube='"+youtube+"' WHERE user_id = "+user_id+""
 
 		connection.query(query, function(){
-
+  res.end();
 		})
 	});
 });
@@ -195,7 +217,7 @@ app.post('/insertcoursecontent', function(req,res){
 
   });
   console.log(query)
-
+  res.end();
 	});
 });
 app.get('/getfile/:contentid/:filename' , function(req,res){
@@ -213,6 +235,7 @@ app.get('/popularcourse/:branch' , function(req,res){
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 });
@@ -224,6 +247,7 @@ app.get('/popularcourse' , function(req,res){
     connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 })
@@ -237,6 +261,7 @@ app.post('/insertuserpurchase/' , function(req,res){
 	  var purchase_ts = req.body.purchase_ts
 		var query = "INSERT INTO `user_purchase`(`course_id`, `branch_id`, `user_id`, `purchase_ts`) VALUES ("+course_id+","+branch_id+","+user_id+",'"+purchase_ts+"')"
 	  connection.query(query);
+      res.end();
 
 	})
 })
@@ -249,6 +274,7 @@ app.get('/userpurchased/:course_id',function(req,res) {
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 });
@@ -261,6 +287,7 @@ app.get('/user/:user_id',function(req,res) {
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 });
@@ -276,6 +303,7 @@ app.post('/insertreview' , function(req,res){
 		var query = "INSERT INTO `course_review`(`course_id`, `user_id`, `review_text`, `review_ts`, `review_vote`) VALUES ("+course_id+","+user_id+",'"+review_text+"','"+review_ts+"',"+review_vote+")"
 
 	  connection.query(query);
+      res.end();
 	})
 })
 
@@ -290,6 +318,7 @@ app.get('/get_avg_voting_by_courseid/:courseid',function(req,res) {
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 })
@@ -303,6 +332,7 @@ app.get('/get_review_course_order_ts/:courseid',function(req,res) {
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 })
@@ -317,6 +347,7 @@ app.get('/get_review_course_user/:userid',function(req,res) {
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 })
@@ -332,7 +363,7 @@ app.post('/insertchat' , function(req,res){
 		var query = "INSERT INTO `course_chat`(`course_id`, `user_id`, `chat_text`, `chat_ts`) VALUES ("+course_id+","+user_id+",'"+chat_text+"','"+chat_ts+"')"
 
 	  connection.query(query);
-
+  res.end();
 	})
 })
 
@@ -345,6 +376,7 @@ app.get('/get_course_chat/:courseid',function(req,res) {
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 })
@@ -359,6 +391,7 @@ app.get('/get_course_content/:courseid',function(req,res) {
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 })
@@ -373,6 +406,7 @@ app.get('/get_course_content_file/:contentid',function(req,res) {
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 })
@@ -386,6 +420,7 @@ app.get('/get_course_announce/:courseid',function(req,res) {
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 })
@@ -399,6 +434,7 @@ app.get('/get_course_announce_comment/:annouid',function(req,res) {
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 })
@@ -433,7 +469,9 @@ app.post('/insertcourse_announce' , function(req,res){
     res.json(data);
 
   });
+
   console.log(query)
+    res.end();
 	})
 })
 
@@ -448,7 +486,7 @@ app.post('/insertcourse_announce_comment' , function(req,res){
 		var query = "INSERT INTO `course_announce_comment`(`annou_id`, `user_id`, `annou_com_text`, `annou_com_ts`) VALUES ("+annou_id+","+user_id+",'"+annou_com_text+"','"+annou_com_ts+"')"
 
 	  connection.query(query);
-
+  res.end();
 	})
 })
 
@@ -461,6 +499,7 @@ app.get('/get_course_q/:courseid',function(req,res) {
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 })
@@ -474,6 +513,7 @@ app.get('/get_course_q_comment/:qid',function(req,res) {
     connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 })
@@ -510,7 +550,9 @@ app.post('/insertcourse_q' , function(req,res){
     res.json(data);
 
   });
+
   console.log(query)
+    res.end();
 	})
 })
 
@@ -525,6 +567,7 @@ app.post('/insertcourse_q_comment' , function(req,res){
 		var query = "INSERT INTO `course_q_comment`(`q_id`, `user_id`, `q_com_text`, `q_com_ts`) VALUES ("+q_id+","+user_id+",'"+q_com_text+"','"+q_com_ts+"')"
 
 	  connection.query(query);
+      res.end();
 
 	})
 })
@@ -539,6 +582,7 @@ app.get('/get_notification/:userid/:notitype',function(req,res) {
     connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 })
@@ -556,7 +600,7 @@ app.post('/insertnotification' , function(req,res){
     var noti_ts = req.body.noti_ts
 		var query = "INSERT INTO `notification`( `course_id`, `user_id`, `noti_cover`, `noti_des`, `noti_type`, `noti_ts`) VALUES ("+course_id+","+user_id+",'"+noti_cover+"','"+noti_des+"',"+noti_type+",'"+noti_ts+"')"
 	  connection.query(query);
-
+  res.end();
 	})
 })
 
@@ -568,6 +612,7 @@ app.post('/insertusertoroom' , function(req,res){
     var user_id = req.body.user_id
 		var query = "INSERT INTO `room_chat`(`course_id`, `user_id`) VALUES ("+course_id+","+user_id+")"
     connection.query(query);
+      res.end();
 	})
 })
 
@@ -580,6 +625,7 @@ app.post('/deleteuserfromroom' , function(req,res){
 		var query = "DELETE FROM `room_chat` WHERE user_id = "+user_id+" AND course_id = "+course_id+""
     connection.query(query);
     connection.release();
+      res.end();
 	})
 })
 
@@ -592,6 +638,7 @@ app.get('/get_userinroom/:courseid',function(req,res) {
     connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 })
@@ -605,6 +652,7 @@ app.get('/get_all_userpurchased/:userid',function(req,res) {
     connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 })
@@ -618,6 +666,8 @@ app.get('/get_all_userowner/:userid',function(req,res) {
     connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+
+      res.end();
 	  });
 	})
 })
@@ -631,6 +681,7 @@ app.get('/get_all_userfavorite/:userid',function(req,res) {
     connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 })
@@ -643,6 +694,7 @@ app.post('/insertusertoroom' , function(req,res){
     var user_id = req.body.user_id
 		var query = "INSERT INTO `user_favorite`(`course_id`, `user_id`) VALUES ("+course_id+","+user_Id+")"
     connection.query(query);
+      res.end();
 	})
 })
 
@@ -696,6 +748,7 @@ app.post('/insertnewuser' , function(req,res){
 	        }
 
 	        console.log('success!');
+            res.end();
 	      });
 	    });
 	  });
@@ -722,6 +775,7 @@ app.get('/get_check_password/:username/:password',function(req,res) {
     connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 })
@@ -735,6 +789,7 @@ app.get('/get_check_username/:username/',function(req,res) {
     connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 })
@@ -748,6 +803,7 @@ app.get('/get_check_email/:email/',function(req,res) {
     connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 })
@@ -757,10 +813,11 @@ app.get('/get_check_email/:email/',function(req,res) {
 app.get('/get_notification_type1/',function(req,res) {
 	mysqlPool.getConnection(function(err, connection) {
 	  if(err) throw err;
-	var query = "SELECT n.course_id,c.subject,c.code,n.user_id,u.fname,u.lname,u.user_img, n.noti_cover, n.noti_des, n.noti_type, n.noti_ts FROM `notification` n INNER JOIN user u ON u.user_id = n.user_id INNER JOIN course c ON c.course_id = n.course_id WHERE noti_type = 1 ORDER BY noti_ts DESC limit 10"
+	var query = "SELECT n.course_id,c.subject,c.code,n.user_id,u.fname,u.lname,u.user_img, n.noti_cover, n.noti_des, n.noti_type, DATE_FORMAT(n.noti_ts, '%Y-%m-%d %H:%i:%s') AS noti_ts FROM `notification` n INNER JOIN user u ON u.user_id = n.user_id INNER JOIN course c ON c.course_id = n.course_id WHERE noti_type = 1 ORDER BY noti_ts DESC limit 10"
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 })
@@ -769,10 +826,11 @@ app.get('/get_notification_type2/:course_id',function(req,res) {
 	mysqlPool.getConnection(function(err, connection) {
 	  if(err) throw err;
 	  var course_id = req.params.course_id
-	  var query = "SELECT n.course_id,n.user_id,u.fname,u.lname,u.user_img, n.noti_cover, n.noti_des, n.noti_type, n.noti_ts FROM `notification` n INNER JOIN user u ON u.user_id = n.user_id WHERE course_id IN ("+course_id+") AND noti_type = 2 ORDER BY noti_ts DESC limit 10"
+	  var query = "SELECT n.course_id,n.user_id,u.fname,u.lname,u.user_img, n.noti_cover, n.noti_des, n.noti_type, DATE_FORMAT(n.noti_ts, '%Y-%m-%d %H:%i:%s') AS noti_ts FROM `notification` n INNER JOIN user u ON u.user_id = n.user_id WHERE course_id IN ("+course_id+") AND noti_type = 2 ORDER BY noti_ts DESC limit 10"
 	  connection.query(query, function(err, rows) {
 		res.json(rows);
 		connection.release();
+      res.end();
 	  });
 	})
 })
@@ -784,6 +842,7 @@ app.get('/get_all_my_user/:userid',function(req,res) {
 		connection.query(query, function(err, rows) {
 			res.json(rows);
 			connection.release();
+        res.end();
 		});
 	})
 })
@@ -795,6 +854,7 @@ app.get('/get_all_my_review/:userid',function(req,res) {
 		connection.query(query, function(err, rows) {
 			res.json(rows);
 			connection.release();
+        res.end();
 		});
 	})
 })
@@ -802,7 +862,6 @@ app.get('/get_all_my_review/:userid',function(req,res) {
 app.post('/updatecourse', function(req,res){
 	mysqlPool.getConnection(function(error,connection) {
     var course_id = req.body.course_id
-    var branch_id = req.body.branch_id
     var subject = req.body.subject
     var code = req.body.code
     var price = req.body.price
@@ -811,10 +870,10 @@ app.post('/updatecourse', function(req,res){
     var coupon = req.body.coupon
 
 
-		var query = "UPDATE `course` SET `branch_id`= "+branch_id+" ,`subject`= '"+subject +"',`code`= '"+code +"',`price`= '"+price +"' ,`des`= '"+des+"',`cover`= '"+cover+"',`coupon`= '"+coupon+"' WHERE course_id = "+course_id+""
-		connection.query(query, function(){
-
-		})
+		var query = "UPDATE `course` SET `subject`= '"+subject +"',`code`= '"+code +"',`price`= '"+price +"' ,`des`= '"+des+"',`cover`= '"+cover+"',`coupon`= '"+coupon+"' WHERE course_id = "+course_id+""
+		console.log(query);
+		connection.query(query)
+      res.end();
 	});
 });
 
