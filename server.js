@@ -32,13 +32,13 @@ app.post('/checkout/:course_id/:branch_id/:user_id/:ts/:amount', function(req, r
   var branch_id = req.params.branch_id
   var user_id = req.params.user_id
   var purchase_ts = req.params.ts
-  var amount = req.params.amount
+  var myAmount = req.params.amount
 
   //console.log(course_id + " " + branch_id +" " +user_id+" "+ purchase_ts );
   //console.log(req.body)
-
+	console.log(myAmount)
     omise.charges.create({
-    'amount': amount , // 10 Baht
+    'amount': myAmount + '00' ,
     'currency': 'thb',
     'card': token
   }, function(err, resp) {

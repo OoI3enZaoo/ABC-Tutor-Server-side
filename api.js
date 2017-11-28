@@ -4,20 +4,13 @@ var multer  = require('multer')
 var fs = require('fs');
 var bodyParser = require("body-parser");
 var app = new Express()
-var mongojs = require('mongojs');
-var db = mongojs('mongodb://172.104.167.197:27017/tutor', ['course_chat']);
+// var mongojs = require('mongojs');
+// var db = mongojs('mongodb://172.104.167.197:27017/tutor', ['course_chat']);
 //var db = mongojs('mongodb://benkung:1320@ds061345.mlab.com:61345/bendb', ['data_info','pic_info']);
+var MongoClient = require('mongodb').MongoClient;
+var url = 'mongodb://172.104.167.197:27017/tutor';
 
-db.on('connect', function() {
-    console.log('mongoDB connected')
-});
-db.on('error', function(err) {
-    console.log('mongoDB error', err)
-});
 
-db.course_chat.find(function (err, docs) {
-	console.log(docs);
-})
 
 app.use(bodyParser.json({limit:1024102420}));
 var storage = multer.diskStorage({
@@ -876,7 +869,54 @@ app.post('/updatecourse', function(req,res){
       res.end();
 	});
 });
+app.get('/getchat/:course_id', async (req,res) => {
+  dataFromMongo(req.params.course_id).then((results) => {
+      return dataFromMySQL(results)
+  })
+  .then((json) => {
+    res.send(json)
+  })
+  .catch((error) => {
+    res.send(error)
+  })
+  //เผื่อใช้ async/await  สั้นกว่า ไฉไลกว่าเดิม
+// try {
+//   const mongoData = await dataFromMongo(req.params.course_id)
+//   const jsonData = await dataFromMySQL(mongoData)
+//   res.send(jsonData)
+// } catch (e) {
+//   res.send(e)
+// }
 
+})
+const dataFromMongo = (course_id) => {
+  return new Promise((resolve, reject) => {
+      MongoClient.connect(url,(req,db) => {
+      db.collection('course_chat').find({course_id : Number.parseInt(course_id)}).sort({chat_ts: 1}).toArray((err, result) => {
+        if (err) throw err;
+        result.length != 0 ? [resolve(result),db.close()]: reject([])
+      })
+    })
+})
+}
+const dataFromMySQL = (data) => {
+  return new Promise((resolve, reject) => {
+    let json = []
+    mysqlPool.getConnection((err, connection) => {
+      data.map((mongo, i) => {
+        var query = "SELECT u.fname , u.lname  FROM user u WHERE u.user_id =  "+mongo.user_id+" ";
+          connection.query(query, (error, rows, field) => {
+            let mysqlData = JSON.parse(JSON.stringify(rows))[0]
+            let mongoData = mongo
+            let merge
+            mysqlData !== undefined ? [merge =  Object.assign(mysqlData, mongoData), json.push(merge)] : ''
+            let mongolength = data.length - 1
+            i == mongolength ? [connection.release(), resolve(json)] : ''
+        })
+      })
+    })
+  })
+}
 
 
 module.exports = app;
