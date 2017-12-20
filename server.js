@@ -3,6 +3,7 @@ var http = require('http');
 var app = new express();
 var server = http.createServer(app);
 var io = require('socket.io').listen(server);
+var ss = require('socket.io-stream');
 var cors = require('cors')
 var bodyParser = require("body-parser");
 var mysql = require('mysql');
@@ -76,6 +77,17 @@ app.post('/checkout/:course_id/:branch_id/:user_id/:ts/:amount', function(req, r
 
 io.on('connection', function (socket) {
     console.log('user connected: ' + socket.id);
+	 ss(socket).on('profile-image', function(stream, data) {
+		//var filename = path.basename(data.name);
+		//stream.pipe(fs.createWriteStream(filename));
+		console.log(stream);
+		console.log(data);
+		//ss(socket).emit('profile-images', stream, {name: 'test'});
+		io.emit('hellotest', stream)
+	  })
+	  socket.on('profile-image2' ,function (data) {
+		io.emit('hellotest', data)  
+	  })
     socket.on('subscribe', function (course_id) {
       socket.join(course_id)
       console.log('subscribe: ' + course_id)
@@ -102,7 +114,7 @@ io.on('connection', function (socket) {
     })
 
     socket.on('live_tutor', function (data) {
-      io.to(data.course_id).emit('live_tutor', data)
+      io.emit('live_tutor', data)
     })
     socket.on('stoplive' ,function (data) {
       io.to(data.course_id).emit('stoplive', data)
