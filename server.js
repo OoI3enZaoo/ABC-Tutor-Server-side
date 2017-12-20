@@ -208,7 +208,7 @@ io.on('connection', function (socket) {
 })
 var api = require('./api.js');
 app.use('/api', api);
-var port = 4000;
+var port = process.env.PORT || 4000;
 server.listen(port ,function(){
 console.log('server running on port: ' + port);
 });
