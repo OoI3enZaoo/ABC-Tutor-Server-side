@@ -35,7 +35,7 @@ var storage = multer.diskStorage({
 });
 var upload = multer({storage: storage});
 var mysqlPool = mysql.createPool({
-    host     : '172.104.167.197',
+    host     : '172.104.189.169',
     user     : 'root',
     password : 'my-secret-pw',
     database : 'tutordb'
@@ -878,7 +878,6 @@ app.get('/getchat/:course_id',  (req,res) => {
       return dataFromMySQL(results)
   })
   .then((json) => {
-
     console.log(new Date().getTime() - start);
     res.send(json)
     res.end();
@@ -972,22 +971,17 @@ app.post('/insertcoursecontent', function(req,res){
 const dataFromMongo = (course_id) => {
   return new Promise((resolve, reject) => {
       MongoClient.connect(url,(req,db) => {
-
       db.collection('course_chat').find({course_id : Number.parseInt(course_id)}).sort({"chat_ts": -1}).limit(10).toArray((err, result) => {
-
         if (err) throw err;
-
         if(result.length != 0){
           db.close()
           resolve(result)
         }else{
           reject([])
         }
-
       })
     })
-})
-
+  })
 }
 
 const dataFromMySQL = (data) => {
@@ -1002,21 +996,12 @@ const dataFromMySQL = (data) => {
             let merge
             if(mysqlData !== undefined){
               merge =  Object.assign(mysqlData, mongoData)
-              // mongo data
-              //   user_id
-              //   chat_text
-              //   chat_ts
-              // mysql data
-              //   fname
-              //   lname
-              //   user_img
               json.push(merge)
             }
             if(i == data.length - 1){
               connection.release()
               resolve(json)
             }
-
         })
       })
     })
